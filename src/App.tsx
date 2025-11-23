@@ -24,7 +24,7 @@ function App() {
       <div className={`py-8 transition-all ${sidebarOpen ? 'md:pr-96' : ''}`}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-blue-600 mb-2">Freesound API Demo</h1>
+            <h1 className="text-4xl font-bold text-blue-600 mb-2">Freesound API</h1>
             <p className="text-gray-700">
               Search and preview sounds from Freesound.org
             </p>
