@@ -99,7 +99,7 @@ export function SoundDetail() {
                 href={`https://freesound.org/people/${sound.username}/`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-blue-600 hover:underline cursor-pointer"
               >
                 {sound.username}
               </a>
@@ -108,7 +108,7 @@ export function SoundDetail() {
           {/* Favorite Button */}
           <button
             onClick={() => toggleFavorite(sound.id)}
-            className="ml-4 p-3 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+            className="ml-4 p-3 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0 cursor-pointer"
             title={isFavorite(sound.id) ? 'Remove from favorites' : 'Add to favorites'}
           >
             <svg
@@ -228,7 +228,7 @@ export function SoundDetail() {
             href={`https://freesound.org/s/${sound.id}/`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold"
+            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold cursor-pointer"
           >
             View on Freesound.org
             <span className="ml-2">→</span>

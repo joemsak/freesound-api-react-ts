@@ -77,7 +77,7 @@ export function FreesoundSearch() {
           <button
             onClick={handleSearch}
             disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
             {loading ? 'Searching...' : 'Search'}
           </button>
@@ -109,7 +109,7 @@ export function FreesoundSearch() {
                       e.stopPropagation();
                       toggleFavorite(sound.id);
                     }}
-                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
                     title={isFavorite(sound.id) ? 'Remove from favorites' : 'Add to favorites'}
                   >
                     <svg
@@ -128,7 +128,7 @@ export function FreesoundSearch() {
                   </button>
                   <Link
                     to={`/sound/${sound.id}`}
-                    className="block mb-2 hover:text-blue-600 transition-colors pr-8"
+                    className="block mb-2 hover:text-blue-600 transition-colors pr-8 cursor-pointer"
                   >
                     <h3 className="font-semibold text-lg mb-1">{sound.name}</h3>
                     <p className="text-sm text-gray-600">
@@ -208,7 +208,7 @@ export function FreesoundSearch() {
                       );
                     }}
                     disabled={loading}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed cursor-pointer"
                   >
                     Previous
                   </button>
@@ -230,7 +230,7 @@ export function FreesoundSearch() {
                       );
                     }}
                     disabled={loading}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
                   >
                     Next
                   </button>

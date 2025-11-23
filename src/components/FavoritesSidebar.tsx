@@ -70,7 +70,7 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
     <>
       {/* Overlay for mobile */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+        className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden cursor-pointer"
         onClick={onToggle}
       />
       {/* Sidebar */}
@@ -84,7 +84,7 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
         </div>
         <button
           onClick={onToggle}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
           title="Close sidebar"
         >
           <svg
@@ -139,14 +139,14 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
               <div className="flex items-start justify-between mb-2">
                 <Link
                   to={`/sound/${sound.id}`}
-                  className="flex-1 hover:text-blue-600 transition-colors"
+                  className="flex-1 hover:text-blue-600 transition-colors cursor-pointer"
                 >
                   <h3 className="font-semibold text-sm mb-1 line-clamp-2">{sound.name}</h3>
                   <p className="text-xs text-gray-600">by {sound.username}</p>
                 </Link>
                 <button
                   onClick={() => removeFavorite(sound.id)}
-                  className="ml-2 p-1 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+                  className="ml-2 p-1 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0 cursor-pointer"
                   title="Remove from favorites"
                 >
                   <svg
