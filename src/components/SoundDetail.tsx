@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { freesound, type SoundObject } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { AudioPlayer } from './AudioPlayer';
 
 export function SoundDetail() {
   const { soundId } = useParams<{ soundId: string }>();
@@ -130,26 +131,12 @@ export function SoundDetail() {
         {/* Waveform and Audio Player */}
         {sound.previews?.['preview-hq-mp3'] && (
           <div className="mb-6">
-            {/* Waveform Image */}
-            {(sound.images?.waveform_m || sound.images?.waveform_l) && (
-              <div className="mb-3 rounded overflow-hidden bg-white border border-gray-300">
-                <img
-                  src={sound.images?.waveform_m || sound.images?.waveform_l}
-                  alt={`Waveform for ${sound.name}`}
-                  className="w-full h-auto"
-                  style={{
-                    display: 'block',
-                    maxHeight: '100px',
-                    objectFit: 'contain',
-                    backgroundColor: '#f9fafb',
-                  }}
-                />
-              </div>
-            )}
-            {/* Audio Player */}
-            <audio controls className="w-full" src={sound.previews['preview-hq-mp3']}>
-              Your browser does not support the audio element.
-            </audio>
+            <AudioPlayer
+              src={sound.previews['preview-hq-mp3']}
+              waveformUrl={sound.images?.waveform_m || sound.images?.waveform_l}
+              soundName={sound.name}
+              waveformMaxHeight={100}
+            />
           </div>
         )}
 

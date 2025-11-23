@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { freesound, type SoundObject } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { AudioPlayer } from './AudioPlayer';
 
 interface FavoritesSidebarProps {
   isOpen: boolean;
@@ -164,15 +165,14 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
                 </button>
               </div>
               {sound.previews?.['preview-hq-mp3'] && (
-                <audio
-                  controls
-                  className="w-full mt-2"
-                  style={{ height: '32px' }}
-                  src={sound.previews['preview-hq-mp3']}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Your browser does not support the audio element.
-                </audio>
+                <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                  <AudioPlayer
+                    src={sound.previews['preview-hq-mp3']}
+                    soundName={sound.name}
+                    className="w-full"
+                    showWaveform={false}
+                  />
+                </div>
               )}
             </div>
           ))}

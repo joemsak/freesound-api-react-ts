@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { freesound, type SoundCollection, type SoundData } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { AudioPlayer } from './AudioPlayer';
 
 export function FreesoundSearch() {
   const [query, setQuery] = useState('');
@@ -149,34 +150,12 @@ export function FreesoundSearch() {
                   )}
                   {sound.previews?.['preview-hq-mp3'] && (
                     <div className="mt-3" onClick={(e) => e.stopPropagation()}>
-                      {/* Waveform Image - styled like Freesound.org */}
-                      {(sound.images?.waveform_m || sound.images?.waveform_l) && (
-                        <div className="mb-2 rounded overflow-hidden bg-white border border-gray-300">
-                          <img
-                            src={sound.images?.waveform_m || sound.images?.waveform_l}
-                            alt={`Waveform for ${sound.name}`}
-                            className="w-full h-auto"
-                            style={{ 
-                              display: 'block',
-                              maxHeight: '60px',
-                              objectFit: 'contain',
-                              backgroundColor: '#f9fafb'
-                            }}
-                            onError={(e) => {
-                              // Hide waveform if image fails to load
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        </div>
-                      )}
-                      {/* Audio Player */}
-                      <audio
-                        controls
-                        className="w-full"
+                      <AudioPlayer
                         src={sound.previews['preview-hq-mp3']}
-                      >
-                        Your browser does not support the audio element.
-                      </audio>
+                        waveformUrl={sound.images?.waveform_m || sound.images?.waveform_l}
+                        soundName={sound.name}
+                        waveformMaxHeight={60}
+                      />
                     </div>
                   )}
                   {sound.duration && (
