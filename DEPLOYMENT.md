@@ -11,12 +11,16 @@ This guide covers how to deploy this application to various free hosting platfor
 ### Setup Steps
 
 1. **Configure GitHub Secrets** (for environment variables):
+   
+   📖 **See detailed instructions**: [GITHUB_SECRETS.md](./GITHUB_SECRETS.md)
+   
+   Quick steps:
    - Go to your repository on GitHub
-   - Navigate to Settings → Secrets and variables → Actions
-   - Add the following secrets:
-     - `VITE_FREESOUND_CLIENT_ID`
-     - `VITE_FREESOUND_CLIENT_SECRET`
-     - `VITE_FREESOUND_API_TOKEN`
+   - Navigate to **Settings → Secrets and variables → Actions**
+   - Click **New repository secret** and add:
+     - `VITE_FREESOUND_CLIENT_ID` - Your Freesound API Client ID
+     - `VITE_FREESOUND_CLIENT_SECRET` - Your Freesound API Client Secret
+     - `VITE_FREESOUND_API_TOKEN` - Your Freesound API Token (optional but recommended)
 
 2. **Enable GitHub Pages**:
    - Go to Settings → Pages

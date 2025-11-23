@@ -28,11 +28,14 @@ function App() {
       <div className={`py-8 pb-24 transition-all ${sidebarOpen ? 'md:pr-96' : ''}`}>
         <div className="container mx-auto px-4">
           {/* Credentials Status */}
-          {!hasCredentials && (
+          {!hasCredentials && import.meta.env.DEV && (
             <div className="max-w-4xl mx-auto mb-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded-lg">
               <p className="font-semibold">⚠️ Missing API Credentials</p>
               <p className="text-sm mt-1">
                 Please ensure VITE_FREESOUND_CLIENT_ID and VITE_FREESOUND_CLIENT_SECRET are set in your .env file
+              </p>
+              <p className="text-xs mt-2 text-yellow-700">
+                For production deployment, add these as GitHub Secrets in repository settings.
               </p>
             </div>
           )}
