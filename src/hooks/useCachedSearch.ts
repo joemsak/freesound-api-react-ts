@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { type SoundCollection } from '../services/freesound';
+import { type SoundCollection, type SoundObject } from '../services/freesound';
 import { useSoundCache } from '../contexts/SoundCacheContext';
 
 interface UseCachedSearchOptions {
@@ -39,17 +39,23 @@ export function useCachedSearch({
     // Check cache first
     const cachedResults = getSearchResults(cacheKey, page);
     if (cachedResults) {
-      setData(cachedResults);
-      setLoading(false);
-      if (onSuccess) {
-        onSuccess(cachedResults);
-      }
+      // Defer setState to avoid cascading renders
+      requestAnimationFrame(() => {
+        setData(cachedResults);
+        setLoading(false);
+        if (onSuccess) {
+          onSuccess(cachedResults);
+        }
+      });
       return;
     }
 
     // Not in cache, make API call
-    setLoading(true);
-    setError(null);
+    // Defer setState to avoid cascading renders
+    requestAnimationFrame(() => {
+      setLoading(true);
+      setError(null);
+    });
 
     searchFn(
       (apiData: SoundCollection) => {
@@ -58,8 +64,10 @@ export function useCachedSearch({
         setLoading(false);
         
         // Cache individual sounds
+        // Note: Search results return SoundData, but we cast to SoundObject for caching
+        // The cache only stores data properties, not methods
         apiData.results.forEach((sound) => {
-          setSound(sound);
+          setSound(sound as SoundObject);
         });
         
         if (onSuccess) {
