@@ -1,46 +1,56 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { freesound, type SoundObject } from '../services/freesound';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 export function SoundDetail() {
   const { soundId } = useParams<{ soundId: string }>();
   const [sound, setSound] = useState<SoundObject | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(() => !!soundId);
+  const [error, setError] = useState<string | null>(() => (!soundId ? 'Invalid sound ID' : null));
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     if (!soundId) {
-      setError('Invalid sound ID');
-      setLoading(false);
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    let cancelled = false;
 
-    freesound.getSound(
-      parseInt(soundId),
-      (data: SoundObject) => {
-        setSound(data);
-        setLoading(false);
-      },
-      (err: unknown) => {
-        let errorMessage = 'Failed to load sound details.';
-        if (err instanceof XMLHttpRequest) {
-          try {
-            const response = JSON.parse(err.responseText || '{}');
-            if (response.detail) {
-              errorMessage = `Error: ${response.detail}`;
-            }
-          } catch {
-            // Ignore parse errors
+    const loadSound = () => {
+      freesound.getSound(
+        parseInt(soundId),
+        (data: SoundObject) => {
+          if (!cancelled) {
+            setSound(data);
+            setLoading(false);
           }
+        },
+        (err: unknown) => {
+          if (cancelled) return;
+          let errorMessage = 'Failed to load sound details.';
+          if (err instanceof XMLHttpRequest) {
+            try {
+              const response = JSON.parse(err.responseText || '{}');
+              if (response.detail) {
+                errorMessage = `Error: ${response.detail}`;
+              }
+            } catch {
+              // Ignore parse errors
+            }
+          }
+          setError(errorMessage);
+          console.error('Freesound API Error:', err);
+          setLoading(false);
         }
-        setError(errorMessage);
-        console.error('Freesound API Error:', err);
-        setLoading(false);
-      }
-    );
+      );
+    };
+
+    loadSound();
+
+    return () => {
+      cancelled = true;
+    };
   }, [soundId]);
 
   if (loading) {
@@ -78,27 +88,44 @@ export function SoundDetail() {
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        {/* Back Link */}
-        <Link
-          to="/"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4"
-        >
-          <span className="mr-2">←</span> Back to Search
-        </Link>
 
-        {/* Sound Title */}
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">{sound.name}</h1>
-        <p className="text-gray-600 mb-6">
-          by{' '}
-          <a
-            href={`https://freesound.org/people/${sound.username}/`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
+        {/* Sound Title with Favorite Button */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">{sound.name}</h1>
+            <p className="text-gray-600">
+              by{' '}
+              <a
+                href={`https://freesound.org/people/${sound.username}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {sound.username}
+              </a>
+            </p>
+          </div>
+          {/* Favorite Button */}
+          <button
+            onClick={() => toggleFavorite(sound.id)}
+            className="ml-4 p-3 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+            title={isFavorite(sound.id) ? 'Remove from favorites' : 'Add to favorites'}
           >
-            {sound.username}
-          </a>
-        </p>
+            <svg
+              className={`w-6 h-6 ${isFavorite(sound.id) ? 'text-yellow-500 fill-current' : 'text-gray-400'}`}
+              fill={isFavorite(sound.id) ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+              />
+            </svg>
+          </button>
+        </div>
 
         {/* Waveform and Audio Player */}
         {sound.previews?.['preview-hq-mp3'] && (
