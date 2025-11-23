@@ -6,8 +6,9 @@ interface SearchInputProps {
 }
 
 export function SearchInput({ query, onQueryChange, onSearch, loading }: SearchInputProps) {
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !loading) {
+      e.preventDefault();
       onSearch();
     }
   };
@@ -18,13 +19,14 @@ export function SearchInput({ query, onQueryChange, onSearch, loading }: SearchI
         type="text"
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
-        onKeyPress={handleKeyPress}
+        onKeyDown={handleKeyDown}
         placeholder="Search for sounds..."
         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
         onClick={onSearch}
         disabled={loading}
+        type="button"
         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap"
       >
         {loading ? 'Searching...' : 'Search'}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { freesound, type SoundCollection } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
@@ -18,6 +18,7 @@ export function FreesoundSearch() {
   const urlQuery = searchParams.get('q') || '';
   const urlPage = parseInt(searchParams.get('page') || '1', 10);
   const initializedRef = useRef(false);
+  const lastSearchRef = useRef<{ query: string; page: number } | null>(null);
   
   const [query, setQuery] = useState(urlQuery);
   const [sounds, setSounds] = useState<SoundCollection | null>(null);
@@ -30,7 +31,7 @@ export function FreesoundSearch() {
   // Update document title based on search query
   useDocumentTitle(urlQuery ? `Search: ${urlQuery}` : 'Search Results');
 
-  const performSearch = (searchQuery: string, page: number = 1) => {
+  const performSearch = useCallback((searchQuery: string, page: number = 1) => {
     if (!searchQuery.trim()) {
       setError('Please enter a search query');
       return;
@@ -53,6 +54,7 @@ export function FreesoundSearch() {
       setSounds(data);
       setSearchResults(searchQuery, page, data); // Cache the results
       setLoading(false);
+      lastSearchRef.current = { query: searchQuery, page };
     };
 
     const errorCallback = (err: unknown) => {
@@ -91,6 +93,7 @@ export function FreesoundSearch() {
               setSearchResults(searchQuery, page, currentData); // Cache the results
               setCurrentPage(page);
               setLoading(false);
+              lastSearchRef.current = { query: searchQuery, page };
             }
           };
           
@@ -101,7 +104,7 @@ export function FreesoundSearch() {
       },
       errorCallback
     );
-  };
+  }, [getSearchResults, setSearchResults]);
 
   const handleSearch = () => {
     const trimmedQuery = query.trim();
@@ -117,7 +120,14 @@ export function FreesoundSearch() {
 
   // Initialize from URL on mount and sync when URL changes
   useEffect(() => {
-    if (!urlQuery) return;
+    if (!urlQuery) {
+      // Clear results if no query
+      setSounds(null);
+      setError(null);
+      setLoading(false);
+      lastSearchRef.current = null;
+      return;
+    }
 
     // Sync query input with URL
     if (!initializedRef.current) {
@@ -127,9 +137,30 @@ export function FreesoundSearch() {
       setQuery(urlQuery);
     }
 
-    // Check if we can navigate from current page or need a fresh search
+    // Check if this is the same search we just did
+    const lastSearch = lastSearchRef.current;
+    const isSameSearch = lastSearch && lastSearch.query === urlQuery && lastSearch.page === urlPage;
+    
+    if (isSameSearch) {
+      // Already performed this exact search, skip to avoid duplicate API calls
+      return;
+    }
+
+    // Check if query changed (new search) - if so, always do fresh search
+    const queryChanged = !lastSearch || lastSearch.query !== urlQuery;
+    
+    if (queryChanged) {
+      // New query - always do fresh search
+      setCurrentPage(urlPage);
+      performSearch(urlQuery, urlPage);
+      return;
+    }
+
+    // Same query, different page - check if we can navigate from current page
     const pageDiff = urlPage - currentPage;
-    const canNavigateFromCurrent = sounds && Math.abs(pageDiff) <= MAX_NAVIGATION_DISTANCE && pageDiff !== 0;
+    const canNavigateFromCurrent = sounds && 
+                                   Math.abs(pageDiff) <= MAX_NAVIGATION_DISTANCE && 
+                                   pageDiff !== 0;
 
     if (canNavigateFromCurrent && sounds) {
       // Navigate using nextPage/previousPage for small page differences
@@ -145,6 +176,7 @@ export function FreesoundSearch() {
           setSounds(currentData);
           setSearchResults(urlQuery, urlPage, currentData); // Cache the results
           setLoading(false);
+          lastSearchRef.current = { query: urlQuery, page: urlPage };
           return;
         }
 
@@ -157,6 +189,7 @@ export function FreesoundSearch() {
             },
             () => {
               // Fallback to fresh search on error
+              lastSearchRef.current = null;
               performSearch(urlQuery, urlPage);
             }
           );
@@ -169,24 +202,25 @@ export function FreesoundSearch() {
             },
             () => {
               // Fallback to fresh search on error
+              lastSearchRef.current = null;
               performSearch(urlQuery, urlPage);
             }
           );
         } else {
           // Can't navigate, do fresh search
+          lastSearchRef.current = null;
           performSearch(urlQuery, urlPage);
         }
       };
 
       navigate();
     } else {
-      // Fresh search or large page jump
+      // Large page jump or no sounds - do fresh search
       setCurrentPage(urlPage);
       performSearch(urlQuery, urlPage);
     }
-    // We intentionally don't include 'query' and 'sounds' to avoid infinite loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlQuery, urlPage]);
+  }, [urlQuery, urlPage, performSearch]);
 
   const navigateToPage = (page: number) => {
     if (loading || page === currentPage || page < 1) return;
@@ -223,6 +257,7 @@ export function FreesoundSearch() {
             <SearchResultsHeader
               count={sounds.count}
               currentPage={currentPage}
+              query={urlQuery}
             />
             <SearchResults
               sounds={sounds}

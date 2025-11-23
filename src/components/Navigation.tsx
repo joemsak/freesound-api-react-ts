@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { SearchInput } from './SearchInput';
 
@@ -11,15 +11,32 @@ interface NavigationProps {
 export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { favorites } = useFavorites();
   const isHomePage = location.pathname === '/';
-  const [query, setQuery] = useState('');
+  const urlQuery = searchParams.get('q') || '';
+  const [query, setQuery] = useState(urlQuery);
+
+  // Sync query with URL when on search page
+  useEffect(() => {
+    if (location.pathname === '/search') {
+      // Defer setState to avoid cascading renders
+      requestAnimationFrame(() => {
+        setQuery(urlQuery);
+      });
+    } else {
+      // Clear query when not on search page
+      requestAnimationFrame(() => {
+        setQuery('');
+      });
+    }
+  }, [location.pathname, urlQuery]);
 
   const handleSearch = () => {
     const trimmedQuery = query.trim();
     if (trimmedQuery) {
-      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`);
-      setQuery('');
+      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}&page=1`);
+      // Don't clear query here - let useEffect sync it
     }
   };
 
