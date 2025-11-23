@@ -32,8 +32,8 @@ A React + TypeScript application for searching and exploring sounds from Freesou
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd react-ts
+git clone git@github.com:joemsak/freesound-api-react-ts.git
+cd freesound-api-react-ts
 ```
 
 2. Install dependencies:
@@ -63,6 +63,8 @@ VITE_FREESOUND_API_TOKEN=your_api_token
 Start the dev server with HMR:
 ```bash
 npm run dev
+# or
+vite
 ```
 
 The app will be available at `http://localhost:5173` (Vite's default port).
@@ -72,6 +74,8 @@ The app will be available at `http://localhost:5173` (Vite's default port).
 Build for production (outputs to `dist/`):
 ```bash
 npm run build
+# or
+vite build
 ```
 
 ### Preview
@@ -79,6 +83,8 @@ npm run build
 Preview the production build locally:
 ```bash
 npm run preview
+# or
+vite preview
 ```
 
 ## Usage
