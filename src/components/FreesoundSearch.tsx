@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { freesound, type SoundCollection, type SoundData } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { AudioPlayer } from './AudioPlayer';
+import { FavoriteButton } from './FavoriteButton';
+import { Tags } from './Tags';
 
 export function FreesoundSearch() {
   const [query, setQuery] = useState('');
@@ -104,29 +106,14 @@ export function FreesoundSearch() {
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow relative"
                 >
                   {/* Favorite Button */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleFavorite(sound.id);
-                    }}
-                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-                    title={isFavorite(sound.id) ? 'Remove from favorites' : 'Add to favorites'}
-                  >
-                    <svg
-                      className={`w-5 h-5 ${isFavorite(sound.id) ? 'text-yellow-500 fill-current' : 'text-gray-400'}`}
-                      fill={isFavorite(sound.id) ? 'currentColor' : 'none'}
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                      />
-                    </svg>
-                  </button>
+                  <div className="absolute top-4 right-4">
+                    <FavoriteButton
+                      soundId={sound.id}
+                      isFavorite={isFavorite(sound.id)}
+                      onToggle={toggleFavorite}
+                      size="md"
+                    />
+                  </div>
                   <Link
                     to={`/sound/${sound.id}`}
                     className="block mb-2 hover:text-blue-600 transition-colors pr-8 cursor-pointer"
@@ -136,18 +123,7 @@ export function FreesoundSearch() {
                       by {sound.username}
                     </p>
                   </Link>
-                  {sound.tags && sound.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {sound.tags.slice(0, 5).map((tag, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <Tags tags={sound.tags || []} maxTags={5} className="mb-3" />
                   {sound.previews?.['preview-hq-mp3'] && (
                     <div className="mt-3" onClick={(e) => e.stopPropagation()}>
                       <AudioPlayer
