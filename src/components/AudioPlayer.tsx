@@ -1,7 +1,11 @@
+import { useEffect, useRef } from 'react';
+import { useAudioPlayer } from '../contexts/AudioPlayerContext';
+
 interface AudioPlayerProps {
   src: string;
   waveformUrl?: string;
   soundName?: string;
+  username?: string;
   className?: string;
   waveformMaxHeight?: number;
   onClick?: (e: React.MouseEvent) => void;
@@ -11,12 +15,46 @@ interface AudioPlayerProps {
 export function AudioPlayer({
   src,
   waveformUrl,
-  soundName,
+  soundName = 'Unknown',
+  username,
   className = 'w-full',
   waveformMaxHeight = 60,
   onClick,
   showWaveform = true,
 }: AudioPlayerProps) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const { registerAudio } = useAudioPlayer();
+
+  useEffect(() => {
+    const audioElement = audioRef.current;
+    if (!audioElement) return;
+
+    // Register this audio element with track info
+    const unregister = registerAudio(audioElement, {
+      src,
+      name: soundName,
+      username,
+      waveformUrl,
+    });
+
+    // Handle play event to ensure only one audio plays at a time
+    const handlePlay = () => {
+      registerAudio(audioElement, {
+        src,
+        name: soundName,
+        username,
+        waveformUrl,
+      });
+    };
+
+    audioElement.addEventListener('play', handlePlay);
+
+    return () => {
+      audioElement.removeEventListener('play', handlePlay);
+      unregister();
+    };
+  }, [registerAudio, src, soundName, username, waveformUrl]);
+
   return (
     <div onClick={onClick}>
       {/* Waveform Image */}
@@ -40,7 +78,7 @@ export function AudioPlayer({
         </div>
       )}
       {/* Audio Player */}
-      <audio controls className={className} src={src}>
+      <audio ref={audioRef} controls className={className} src={src}>
         Your browser does not support the audio element.
       </audio>
     </div>

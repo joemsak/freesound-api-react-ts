@@ -38,6 +38,7 @@ export function SoundCard({ sound, isFavorite, onToggleFavorite }: SoundCardProp
             src={sound.previews['preview-hq-mp3']}
             waveformUrl={sound.images?.waveform_m || sound.images?.waveform_l}
             soundName={sound.name}
+            username={sound.username}
             waveformMaxHeight={60}
           />
         </div>

@@ -157,6 +157,7 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
                   <AudioPlayer
                     src={sound.previews['preview-hq-mp3']}
                     soundName={sound.name}
+                    username={sound.username}
                     className="w-full"
                     showWaveform={false}
                   />

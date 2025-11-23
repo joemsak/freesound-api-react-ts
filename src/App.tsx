@@ -4,6 +4,7 @@ import { FreesoundSearch } from './screens/FreesoundSearch';
 import { SoundDetail } from './screens/SoundDetail';
 import { FavoritesSidebar } from './components/FavoritesSidebar';
 import { Navigation } from './components/Navigation';
+import { FixedAudioPlayer } from './components/FixedAudioPlayer';
 
 function App() {
   // Access environment variables using import.meta.env
@@ -20,8 +21,8 @@ function App() {
         favoritesOpen={sidebarOpen}
       />
 
-      {/* Main Content Area - with conditional right margin for sidebar */}
-      <div className={`py-8 transition-all ${sidebarOpen ? 'md:pr-96' : ''}`}>
+      {/* Main Content Area - with conditional right margin for sidebar and bottom padding for fixed player */}
+      <div className={`py-8 pb-24 transition-all ${sidebarOpen ? 'md:pr-96' : ''}`}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-blue-600 mb-2">Freesound API</h1>
@@ -50,6 +51,9 @@ function App() {
 
       {/* Favorites Sidebar */}
       <FavoritesSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+
+      {/* Fixed Audio Player Footer */}
+      <FixedAudioPlayer />
     </div>
   );
 }
