@@ -58,23 +58,25 @@ VITE_FREESOUND_API_TOKEN=your_api_token
    - Client Secret
    - API Token (for direct API access)
 
-### Running the Application
+### Development
 
-Start the development server:
+Start the dev server with HMR:
 ```bash
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+The app will be available at `http://localhost:5173` (Vite's default port).
 
-### Building for Production
+### Build
 
-Build the application:
+Build for production (outputs to `dist/`):
 ```bash
 npm run build
 ```
 
-Preview the production build:
+### Preview
+
+Preview the production build locally:
 ```bash
 npm run preview
 ```
