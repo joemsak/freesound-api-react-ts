@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom';
 import { type SoundData } from '../services/freesound';
 import { AudioPlayer } from './AudioPlayer';
 import { FavoriteButton } from './FavoriteButton';
 import { Tags } from './Tags';
+import { SoundTitle } from './SoundTitle';
 
 interface SoundCardProps {
   sound: SoundData;
@@ -25,26 +25,13 @@ export function SoundCard({ sound, isFavorite, onToggleFavorite }: SoundCardProp
       
       {/* Content Section - grows to fill space */}
       <div className="flex-1 flex flex-col">
-        <Link
-          to={`/sound/${sound.id}`}
-          className="block mb-2 hover:text-blue-600 transition-colors pr-8 cursor-pointer"
-          title={sound.name}
-        >
-          <h3 className="font-semibold text-lg mb-1 truncate" title={sound.name}>
-            {sound.name}
-          </h3>
-          <p className="text-sm text-gray-600 truncate" title={`by ${sound.username}`}>
-            by{' '}
-            <Link
-              to={`/user/${sound.username}`}
-              onClick={(e) => e.stopPropagation()}
-              className="text-blue-600 hover:underline cursor-pointer"
-              title={sound.username}
-            >
-              {sound.username}
-            </Link>
-          </p>
-        </Link>
+        <div className="mb-2 pr-8">
+          <SoundTitle
+            soundId={sound.id}
+            soundName={sound.name}
+            username={sound.username}
+          />
+        </div>
         <Tags tags={sound.tags || []} maxTags={5} className="mb-3" />
         {sound.duration && (
           <p className="text-xs text-gray-500 mb-3">

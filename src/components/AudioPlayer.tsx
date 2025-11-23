@@ -31,24 +31,20 @@ export function AudioPlayer({
     const audioElement = audioRef.current;
     if (!audioElement) return;
 
-    // Register this audio element with track info
-    const unregister = registerAudio(audioElement, {
+    const trackInfo = {
       src,
       name: soundName,
       username,
       waveformUrl,
       soundId,
-    });
+    };
+
+    // Register this audio element with track info
+    const unregister = registerAudio(audioElement, trackInfo);
 
     // Handle play event to ensure only one audio plays at a time
     const handlePlay = () => {
-      registerAudio(audioElement, {
-        src,
-        name: soundName,
-        username,
-        waveformUrl,
-        soundId,
-      });
+      registerAudio(audioElement, trackInfo);
     };
 
     audioElement.addEventListener('play', handlePlay);

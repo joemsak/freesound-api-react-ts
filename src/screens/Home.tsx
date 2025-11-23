@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { freesound, type SoundCollection, type SoundObject } from '../services/freesound';
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { freesound, type SoundObject } from '../services/freesound';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { useSoundCache } from '../contexts/SoundCacheContext';
+import { useCachedSearch } from '../hooks/useCachedSearch';
 import { SearchInput } from '../components/SearchInput';
 import { SoundCard } from '../components/SoundCard';
 import { AudioPlayer } from '../components/AudioPlayer';
@@ -11,119 +11,58 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { DEFAULT_SOUND_FIELDS } from '../constants';
-import { Link } from 'react-router-dom';
 
 export function Home() {
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useFavorites();
-  const { getSearchResults, setSearchResults, setSound } = useSoundCache();
   const [query, setQuery] = useState('');
-  const [newSounds, setNewSounds] = useState<SoundCollection | null>(null);
-  const [randomSound, setRandomSound] = useState<SoundObject | null>(null);
-  const [loadingNewSounds, setLoadingNewSounds] = useState(true);
-  const [loadingRandomSound, setLoadingRandomSound] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useDocumentTitle('Freesound - Discover Sounds');
 
   // Load new sounds - with caching
-  useEffect(() => {
-    const cacheKey = 'home:new_sounds';
-    const page = 1;
-    
-    // Check cache first
-    const cachedResults = getSearchResults(cacheKey, page);
-    if (cachedResults) {
-      // Use requestAnimationFrame to defer setState
-      requestAnimationFrame(() => {
-        setNewSounds(cachedResults);
-        setLoadingNewSounds(false);
-      });
-      return;
-    }
-
-    let cancelled = false;
-    
-    freesound.textSearch(
-      '',
-      {
-        sort: 'created_desc',
-        page_size: 6,
-        fields: DEFAULT_SOUND_FIELDS,
-      },
-      (data: SoundCollection) => {
-        if (!cancelled) {
-          setNewSounds(data);
-          setSearchResults(cacheKey, page, data); // Cache the search results
-          setLoadingNewSounds(false);
-          // Cache individual sounds
-          data.results.forEach((sound) => {
-            setSound(sound as SoundObject);
-          });
-        }
-      },
-      (err: unknown) => {
-        if (!cancelled) {
-          console.error('Failed to load new sounds:', err);
-          setLoadingNewSounds(false);
-        }
-      }
-    );
-
-    return () => {
-      cancelled = true;
-    };
-  }, [getSearchResults, setSearchResults, setSound]);
+  const { data: newSounds, loading: loadingNewSounds } = useCachedSearch({
+    cacheKey: 'home:new_sounds',
+    page: 1,
+    searchFn: (success, errorCallback) => {
+      freesound.textSearch(
+        '',
+        {
+          sort: 'created_desc',
+          page_size: 6,
+          fields: DEFAULT_SOUND_FIELDS,
+        },
+        success,
+        errorCallback
+      );
+    },
+    onError: (err) => {
+      console.error('Failed to load new sounds:', err);
+    },
+  });
 
   // Load random sound - with caching
-  useEffect(() => {
-    const cacheKey = 'home:random_sound';
-    const page = 1;
-    
-    // Check cache first
-    const cachedResults = getSearchResults(cacheKey, page);
-    if (cachedResults && cachedResults.results.length > 0) {
-      const sound = cachedResults.results[0] as SoundObject;
-      // Use requestAnimationFrame to defer setState
-      requestAnimationFrame(() => {
-        setRandomSound(sound);
-        setLoadingRandomSound(false);
-      });
-      return;
-    }
+  const { data: randomSoundData, loading: loadingRandomSound } = useCachedSearch({
+    cacheKey: 'home:random_sound',
+    page: 1,
+    searchFn: (success, errorCallback) => {
+      freesound.textSearch(
+        '',
+        {
+          sort: 'random',
+          page_size: 1,
+          fields: DEFAULT_SOUND_FIELDS,
+        },
+        success,
+        errorCallback
+      );
+    },
+    onError: (err) => {
+      console.error('Failed to load random sound:', err);
+    },
+  });
 
-    let cancelled = false;
-    
-    freesound.textSearch(
-      '',
-      {
-        sort: 'random',
-        page_size: 1,
-        fields: DEFAULT_SOUND_FIELDS,
-      },
-      (data: SoundCollection) => {
-        if (!cancelled) {
-          if (data.results.length > 0) {
-            const sound = data.results[0] as SoundObject;
-            setRandomSound(sound);
-            setSound(sound);
-            setSearchResults(cacheKey, page, data); // Cache the search results
-          }
-          setLoadingRandomSound(false);
-        }
-      },
-      (err: unknown) => {
-        if (!cancelled) {
-          console.error('Failed to load random sound:', err);
-          setLoadingRandomSound(false);
-        }
-      }
-    );
-
-    return () => {
-      cancelled = true;
-    };
-  }, [getSearchResults, setSearchResults, setSound]);
+  const randomSound = randomSoundData?.results[0] as SoundObject | undefined;
 
   const handleSearch = () => {
     const trimmedQuery = query.trim();

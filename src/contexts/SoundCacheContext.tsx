@@ -40,9 +40,10 @@ function loadSoundCacheFromStorage(): Map<number, CachedSound> {
       const now = Date.now();
       
       // Filter out expired entries
-      Object.entries(parsed).forEach(([id, cached]: [string, any]) => {
-        if (cached.timestamp && cached.data && (now - cached.timestamp) < CACHE_EXPIRY_MS) {
-          cache.set(parseInt(id), cached);
+      Object.entries(parsed).forEach(([id, cached]: [string, unknown]) => {
+        const cachedSound = cached as CachedSound;
+        if (cachedSound.timestamp && cachedSound.data && (now - cachedSound.timestamp) < CACHE_EXPIRY_MS) {
+          cache.set(parseInt(id), cachedSound);
         }
       });
       
@@ -80,9 +81,10 @@ function loadSearchCacheFromStorage(): Map<string, CachedSearch> {
       const now = Date.now();
       
       // Filter out expired entries
-      Object.entries(parsed).forEach(([key, cached]: [string, any]) => {
-        if (cached.timestamp && cached.data && (now - cached.timestamp) < CACHE_EXPIRY_MS) {
-          cache.set(key, cached);
+      Object.entries(parsed).forEach(([key, cached]: [string, unknown]) => {
+        const cachedSearch = cached as CachedSearch;
+        if (cachedSearch.timestamp && cachedSearch.data && (now - cachedSearch.timestamp) < CACHE_EXPIRY_MS) {
+          cache.set(key, cachedSearch);
         }
       });
       

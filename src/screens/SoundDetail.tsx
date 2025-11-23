@@ -9,13 +9,14 @@ import { AudioPlayer } from '../components/AudioPlayer';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { Tags } from '../components/Tags';
 import { SoundMetadata } from '../components/SoundMetadata';
-import { ErrorMessage } from '../components/ErrorMessage';
-import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ScreenLayout } from '../components/ScreenLayout';
+import { useCancelledRef } from '../hooks/useAsyncEffect';
 
 export function SoundDetail() {
   const { soundId } = useParams<{ soundId: string }>();
   const { getSound, setSound: cacheSound } = useSoundCache();
   const { toggleFavorite, isFavorite } = useFavorites();
+  const cancelled = useCancelledRef();
   
   // Initialize from cache if available
   const cachedSound = soundId ? getSound(parseInt(soundId)) : null;
@@ -41,11 +42,10 @@ export function SoundDetail() {
     }
 
     // Not in cache, load from API
-    let cancelled = false;
-    
-    // Use requestAnimationFrame to defer setState
+    cancelled.reset();
+    // Defer setState to avoid cascading renders
     requestAnimationFrame(() => {
-      if (!cancelled) {
+      if (!cancelled.cancelled) {
         setLoading(true);
       }
     });
@@ -53,131 +53,108 @@ export function SoundDetail() {
     freesound.getSound(
       id,
       (data: SoundObject) => {
-        if (!cancelled) {
+        if (!cancelled.cancelled) {
           setSound(data);
           cacheSound(data); // Store in cache
           setLoading(false);
         }
       },
       (err: unknown) => {
-        if (cancelled) return;
+        if (cancelled.cancelled) return;
         const errorMessage = extractErrorMessage(err, 'Failed to load sound details.');
         setError(errorMessage);
         console.error('Freesound API Error:', err);
         setLoading(false);
       }
     );
-
-    return () => {
-      cancelled = true;
-    };
-  }, [soundId, getSound, cacheSound]);
-
-  if (loading) {
-    return (
-      <div className="w-full max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <LoadingSpinner message="Loading sound details..." />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <ErrorMessage message={error} className="mb-4" />
-          <Link
-            to="/"
-            className="text-blue-600 hover:text-blue-800 underline"
-          >
-            ← Back to Search
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  }, [soundId, getSound, cacheSound, cancelled]);
 
   if (!sound) {
     return null;
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-
-        {/* Sound Title with Favorite Button */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">{sound.name}</h1>
-            <p className="text-gray-600">
-              by{' '}
-              <Link
-                to={`/user/${sound.username}`}
-                className="text-blue-600 hover:underline cursor-pointer"
-              >
-                {sound.username}
-              </Link>
-            </p>
-          </div>
-          {/* Favorite Button */}
-          <FavoriteButton
-            soundId={sound.id}
-            isFavorite={isFavorite(sound.id)}
-            onToggle={toggleFavorite}
-            size="lg"
-            className="ml-4"
-          />
-        </div>
-
-        {/* Waveform and Audio Player */}
-        {sound.previews?.['preview-hq-mp3'] && (
-          <div className="mb-6">
-            <AudioPlayer
-              src={sound.previews['preview-hq-mp3']}
-              waveformUrl={sound.images?.waveform_m || sound.images?.waveform_l}
-              soundName={sound.name}
-              username={sound.username}
+    <ScreenLayout
+      loading={loading}
+      error={error}
+      hasData={!!sound}
+      loadingMessage="Loading sound details..."
+      emptyMessage="Sound not found"
+    >
+      <div className="w-full max-w-4xl mx-auto p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          {/* Sound Title with Favorite Button */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">{sound.name}</h1>
+              <p className="text-gray-600">
+                by{' '}
+                <Link
+                  to={`/user/${sound.username}`}
+                  className="text-blue-600 hover:underline cursor-pointer"
+                >
+                  {sound.username}
+                </Link>
+              </p>
+            </div>
+            {/* Favorite Button */}
+            <FavoriteButton
               soundId={sound.id}
-              waveformMaxHeight={100}
+              isFavorite={isFavorite(sound.id)}
+              onToggle={toggleFavorite}
+              size="lg"
+              className="ml-4"
             />
           </div>
-        )}
 
-        {/* Sound Details */}
-        <SoundMetadata sound={sound} />
+          {/* Waveform and Audio Player */}
+          {sound.previews?.['preview-hq-mp3'] && (
+            <div className="mb-6">
+              <AudioPlayer
+                src={sound.previews['preview-hq-mp3']}
+                waveformUrl={sound.images?.waveform_m || sound.images?.waveform_l}
+                soundName={sound.name}
+                username={sound.username}
+                soundId={sound.id}
+                waveformMaxHeight={100}
+              />
+            </div>
+          )}
 
-        {/* Description */}
-        {sound.description && (
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Description</h2>
-            <p className="text-gray-700 whitespace-pre-wrap">{sound.description}</p>
+          {/* Sound Details */}
+          <SoundMetadata sound={sound} />
+
+          {/* Description */}
+          {sound.description && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Description</h2>
+              <p className="text-gray-700 whitespace-pre-wrap">{sound.description}</p>
+            </div>
+          )}
+
+          {/* Tags */}
+          {sound.tags && sound.tags.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Tags</h2>
+              <Tags tags={sound.tags} variant="rounded" className="gap-2" />
+            </div>
+          )}
+
+          {/* External Link */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <a
+              href={`https://freesound.org/s/${sound.id}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold cursor-pointer"
+            >
+              View on Freesound.org
+              <span className="ml-2">→</span>
+            </a>
           </div>
-        )}
-
-        {/* Tags */}
-        {sound.tags && sound.tags.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Tags</h2>
-            <Tags tags={sound.tags} variant="rounded" className="gap-2" />
-          </div>
-        )}
-
-        {/* External Link */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <a
-            href={`https://freesound.org/s/${sound.id}/`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold cursor-pointer"
-          >
-            View on Freesound.org
-            <span className="ml-2">→</span>
-          </a>
         </div>
       </div>
-    </div>
+    </ScreenLayout>
   );
 }
 

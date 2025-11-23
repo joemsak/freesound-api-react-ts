@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { freesound, type SoundObject } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useSoundCache } from '../contexts/SoundCacheContext';
@@ -7,6 +6,8 @@ import { AudioPlayer } from './AudioPlayer';
 import { FavoriteButton } from './FavoriteButton';
 import { CloseButton } from './CloseButton';
 import { LoadingSpinner } from './LoadingSpinner';
+import { SoundTitle } from './SoundTitle';
+import { useCancelledRef } from '../hooks/useAsyncEffect';
 
 interface FavoritesSidebarProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
   const { getSound, setSound: cacheSound } = useSoundCache();
   const [favoriteSounds, setFavoriteSounds] = useState<SoundObject[]>([]);
   const [loading, setLoading] = useState(false);
+  const cancelled = useCancelledRef();
 
   useEffect(() => {
     if (favorites.length === 0) {
@@ -27,13 +29,13 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
     }
 
     setLoading(true);
-    let cancelled = false;
+    cancelled.reset();
     const soundsMap = new Map<number, SoundObject>();
     let loaded = 0;
     const currentFavorites = [...favorites];
 
     const checkComplete = () => {
-      if (cancelled) return;
+      if (cancelled.cancelled) return;
       if (loaded === currentFavorites.length) {
         // Sort sounds to match favorites order
         const sortedSounds = currentFavorites
@@ -48,7 +50,7 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
       // Check cache first
       const cachedSound = getSound(soundId);
       if (cachedSound) {
-        if (!cancelled) {
+        if (!cancelled.cancelled) {
           soundsMap.set(soundId, cachedSound);
           loaded++;
           checkComplete();
@@ -60,7 +62,7 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
       freesound.getSound(
         soundId,
         (data: SoundObject) => {
-          if (!cancelled) {
+          if (!cancelled.cancelled) {
             soundsMap.set(soundId, data);
             cacheSound(data); // Store in cache
             loaded++;
@@ -68,18 +70,14 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
           }
         },
         () => {
-          if (!cancelled) {
+          if (!cancelled.cancelled) {
             loaded++;
             checkComplete();
           }
         }
       );
     });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [favorites, getSound, cacheSound]);
+  }, [favorites, getSound, cacheSound, cancelled]);
 
   if (!isOpen) {
     return null;
@@ -137,24 +135,12 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
-                  <Link
-                    to={`/sound/${sound.id}`}
-                    className="block hover:text-blue-600 transition-colors cursor-pointer"
-                    title={sound.name}
-                  >
-                    <h3 className="font-semibold text-sm mb-1 line-clamp-2" title={sound.name}>
-                      {sound.name}
-                    </h3>
-                  </Link>
-                  <p className="text-xs text-gray-600">
-                    by{' '}
-                    <Link
-                      to={`/user/${sound.username}`}
-                      className="text-blue-600 hover:underline cursor-pointer"
-                    >
-                      {sound.username}
-                    </Link>
-                  </p>
+                  <SoundTitle
+                    soundId={sound.id}
+                    soundName={sound.name}
+                    username={sound.username}
+                    variant="compact"
+                  />
                 </div>
                 <FavoriteButton
                   soundId={sound.id}
