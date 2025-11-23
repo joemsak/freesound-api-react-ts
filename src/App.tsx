@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { Home } from './screens/Home';
 import { FreesoundSearch } from './screens/FreesoundSearch';
 import { SoundDetail } from './screens/SoundDetail';
+import { UserProfile } from './screens/UserProfile';
+import { TagSearch } from './screens/TagSearch';
 import { FavoritesSidebar } from './components/FavoritesSidebar';
 import { Navigation } from './components/Navigation';
 import { FixedAudioPlayer } from './components/FixedAudioPlayer';
@@ -24,13 +27,6 @@ function App() {
       {/* Main Content Area - with conditional right margin for sidebar and bottom padding for fixed player */}
       <div className={`py-8 pb-24 transition-all ${sidebarOpen ? 'md:pr-96' : ''}`}>
         <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-blue-600 mb-2">Freesound API</h1>
-            <p className="text-gray-700">
-              Search and preview sounds from Freesound.org
-            </p>
-          </div>
-
           {/* Credentials Status */}
           {!hasCredentials && (
             <div className="max-w-4xl mx-auto mb-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded-lg">
@@ -43,8 +39,11 @@ function App() {
 
           {/* Routes */}
           <Routes>
-            <Route path="/" element={<FreesoundSearch />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/search" element={<FreesoundSearch />} />
             <Route path="/sound/:soundId" element={<SoundDetail />} />
+            <Route path="/user/:username" element={<UserProfile />} />
+            <Route path="/tag/:tagName" element={<TagSearch />} />
           </Routes>
         </div>
       </div>

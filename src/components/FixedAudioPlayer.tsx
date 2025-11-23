@@ -1,8 +1,12 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useAudioPlayer } from '../contexts/AudioPlayerContext';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { FavoriteButton } from './FavoriteButton';
 
 export function FixedAudioPlayer() {
   const { currentTrack, pauseCurrent } = useAudioPlayer();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Sync the fixed player audio element with the current track's audio element
@@ -96,7 +100,13 @@ export function FixedAudioPlayer() {
                 </p>
                 {currentTrack.username && (
                   <p className="text-xs text-gray-600 truncate">
-                    {currentTrack.username}
+                    by{' '}
+                    <Link
+                      to={`/user/${currentTrack.username}`}
+                      className="text-blue-600 hover:underline cursor-pointer"
+                    >
+                      {currentTrack.username}
+                    </Link>
                   </p>
                 )}
               </div>
@@ -105,6 +115,15 @@ export function FixedAudioPlayer() {
 
           {/* Audio Controls */}
           <div className="flex items-center gap-2">
+            {currentTrack.soundId && (
+              <FavoriteButton
+                soundId={currentTrack.soundId}
+                isFavorite={isFavorite(currentTrack.soundId)}
+                onToggle={toggleFavorite}
+                size="md"
+                className="flex-shrink-0"
+              />
+            )}
             <button
               onClick={pauseCurrent}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"

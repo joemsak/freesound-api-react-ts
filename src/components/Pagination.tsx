@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { type SoundCollection } from '../services/freesound';
 import { calculatePageNumbers } from '../utils/pagination';
-import { buildSearchUrl } from '../utils/url';
+import { buildSearchUrl, buildUserUrl, buildTagUrl } from '../utils/url';
 import { PAGE_SIZE, MAX_VISIBLE_PAGES } from '../constants';
 
 interface PaginationProps {
@@ -10,6 +10,8 @@ interface PaginationProps {
   urlQuery: string;
   loading: boolean;
   onPageChange: (page: number) => void;
+  isUserProfile?: boolean;
+  isTagSearch?: boolean;
 }
 
 export function Pagination({
@@ -18,9 +20,21 @@ export function Pagination({
   urlQuery,
   loading,
   onPageChange,
+  isUserProfile = false,
+  isTagSearch = false,
 }: PaginationProps) {
   const totalPages = Math.ceil(sounds.count / PAGE_SIZE);
   const pageNumbers = calculatePageNumbers(currentPage, totalPages, MAX_VISIBLE_PAGES);
+
+  const buildPageUrl = (page: number): string => {
+    if (isUserProfile) {
+      return buildUserUrl(urlQuery, page);
+    }
+    if (isTagSearch) {
+      return buildTagUrl(urlQuery, page);
+    }
+    return buildSearchUrl(urlQuery, page);
+  };
 
   if (sounds.count === 0) {
     return null;
@@ -31,7 +45,7 @@ export function Pagination({
       {/* Previous Button */}
       {sounds.previous && (
         <Link
-          to={buildSearchUrl(urlQuery, currentPage - 1)}
+          to={buildPageUrl(currentPage - 1)}
           onClick={(e) => {
             e.preventDefault();
             if (loading) return;
@@ -59,7 +73,7 @@ export function Pagination({
         return (
           <Link
             key={pageNum}
-            to={buildSearchUrl(urlQuery, pageNum)}
+            to={buildPageUrl(pageNum)}
             onClick={(e) => {
               e.preventDefault();
               if (loading || isActive) return;
@@ -79,7 +93,7 @@ export function Pagination({
       {/* Next Button */}
       {sounds.next && (
         <Link
-          to={buildSearchUrl(urlQuery, currentPage + 1)}
+          to={buildPageUrl(currentPage + 1)}
           onClick={(e) => {
             e.preventDefault();
             if (loading) return;

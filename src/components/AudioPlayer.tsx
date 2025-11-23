@@ -6,6 +6,7 @@ interface AudioPlayerProps {
   waveformUrl?: string;
   soundName?: string;
   username?: string;
+  soundId?: number;
   className?: string;
   waveformMaxHeight?: number;
   onClick?: (e: React.MouseEvent) => void;
@@ -17,6 +18,7 @@ export function AudioPlayer({
   waveformUrl,
   soundName = 'Unknown',
   username,
+  soundId,
   className = 'w-full',
   waveformMaxHeight = 60,
   onClick,
@@ -35,6 +37,7 @@ export function AudioPlayer({
       name: soundName,
       username,
       waveformUrl,
+      soundId,
     });
 
     // Handle play event to ensure only one audio plays at a time
@@ -44,6 +47,7 @@ export function AudioPlayer({
         name: soundName,
         username,
         waveformUrl,
+        soundId,
       });
     };
 
@@ -53,7 +57,7 @@ export function AudioPlayer({
       audioElement.removeEventListener('play', handlePlay);
       unregister();
     };
-  }, [registerAudio, src, soundName, username, waveformUrl]);
+  }, [registerAudio, src, soundName, username, waveformUrl, soundId]);
 
   return (
     <div onClick={onClick}>

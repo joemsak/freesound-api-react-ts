@@ -5,7 +5,7 @@ interface SoundMetadataProps {
 }
 
 export function SoundMetadata({ sound }: SoundMetadataProps) {
-  const metadataItems = [
+  const metadataItems: Array<{ label: string; value: string }> = [
     sound.duration && {
       label: 'Duration',
       value: `${sound.duration.toFixed(2)}s`,
@@ -30,7 +30,7 @@ export function SoundMetadata({ sound }: SoundMetadataProps) {
       label: 'License',
       value: sound.license,
     },
-  ].filter((item): item is { label: string; value: string } => item !== false);
+  ].filter((item): item is { label: string; value: string } => Boolean(item));
 
   if (metadataItems.length === 0) {
     return null;

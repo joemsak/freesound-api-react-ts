@@ -136,13 +136,26 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
               className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow"
             >
               <div className="flex items-start justify-between mb-2">
-                <Link
-                  to={`/sound/${sound.id}`}
-                  className="flex-1 hover:text-blue-600 transition-colors cursor-pointer"
-                >
-                  <h3 className="font-semibold text-sm mb-1 line-clamp-2">{sound.name}</h3>
-                  <p className="text-xs text-gray-600">by {sound.username}</p>
-                </Link>
+                <div className="flex-1">
+                  <Link
+                    to={`/sound/${sound.id}`}
+                    className="block hover:text-blue-600 transition-colors cursor-pointer"
+                    title={sound.name}
+                  >
+                    <h3 className="font-semibold text-sm mb-1 line-clamp-2" title={sound.name}>
+                      {sound.name}
+                    </h3>
+                  </Link>
+                  <p className="text-xs text-gray-600">
+                    by{' '}
+                    <Link
+                      to={`/user/${sound.username}`}
+                      className="text-blue-600 hover:underline cursor-pointer"
+                    >
+                      {sound.username}
+                    </Link>
+                  </p>
+                </div>
                 <FavoriteButton
                   soundId={sound.id}
                   isFavorite={true}
@@ -158,6 +171,7 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
                     src={sound.previews['preview-hq-mp3']}
                     soundName={sound.name}
                     username={sound.username}
+                    soundId={sound.id}
                     className="w-full"
                     showWaveform={false}
                   />

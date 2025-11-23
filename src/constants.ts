@@ -1,7 +1,7 @@
-/**
- * Application-wide constants
- */
-export const PAGE_SIZE = 10;
+// Pagination
+export const PAGE_SIZE = 20;
 export const MAX_VISIBLE_PAGES = 7;
-export const MAX_NAVIGATION_DISTANCE = 3; // Pages to navigate using nextPage/previousPage vs fresh search
+export const MAX_NAVIGATION_DISTANCE = 3;
 
+// API Fields - commonly requested fields for sound data
+export const DEFAULT_SOUND_FIELDS = 'id,name,previews,images,username,tags,duration';

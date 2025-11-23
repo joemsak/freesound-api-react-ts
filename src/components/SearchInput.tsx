@@ -13,7 +13,7 @@ export function SearchInput({ query, onQueryChange, onSearch, loading }: SearchI
   };
 
   return (
-    <div className="flex gap-2 mb-6">
+    <div className="flex gap-2 w-full">
       <input
         type="text"
         value={query}
@@ -25,7 +25,7 @@ export function SearchInput({ query, onQueryChange, onSearch, loading }: SearchI
       <button
         onClick={onSearch}
         disabled={loading}
-        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap"
       >
         {loading ? 'Searching...' : 'Search'}
       </button>

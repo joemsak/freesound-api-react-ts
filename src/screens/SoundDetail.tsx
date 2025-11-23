@@ -113,14 +113,12 @@ export function SoundDetail() {
             <h1 className="text-3xl font-bold text-gray-800 mb-2">{sound.name}</h1>
             <p className="text-gray-600">
               by{' '}
-              <a
-                href={`https://freesound.org/people/${sound.username}/`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to={`/user/${sound.username}`}
                 className="text-blue-600 hover:underline cursor-pointer"
               >
                 {sound.username}
-              </a>
+              </Link>
             </p>
           </div>
           {/* Favorite Button */}
@@ -141,6 +139,7 @@ export function SoundDetail() {
               waveformUrl={sound.images?.waveform_m || sound.images?.waveform_l}
               soundName={sound.name}
               username={sound.username}
+              soundId={sound.id}
               waveformMaxHeight={100}
             />
           </div>

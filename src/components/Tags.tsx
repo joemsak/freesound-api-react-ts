@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 interface TagsProps {
   tags: string[];
   maxTags?: number;
@@ -12,17 +14,21 @@ export function Tags({ tags, maxTags, className = '', variant = 'default' }: Tag
 
   const displayTags = maxTags ? tags.slice(0, maxTags) : tags;
   const tagClassName = variant === 'rounded' 
-    ? 'px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full'
-    : 'px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded';
+    ? 'px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200 transition-colors cursor-pointer'
+    : 'px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 transition-colors cursor-pointer';
 
   return (
     <div className={`flex flex-wrap gap-1 ${className}`}>
       {displayTags.map((tag, idx) => (
-        <span key={idx} className={tagClassName}>
+        <Link
+          key={idx}
+          to={`/tag/${encodeURIComponent(tag)}`}
+          className={tagClassName}
+          onClick={(e) => e.stopPropagation()}
+        >
           {tag}
-        </span>
+        </Link>
       ))}
     </div>
   );
 }
-

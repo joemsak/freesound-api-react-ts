@@ -5,7 +5,7 @@ import { useFavorites } from '../contexts/FavoritesContext';
 import { useSoundCache } from '../contexts/SoundCacheContext';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { PAGE_SIZE, MAX_NAVIGATION_DISTANCE } from '../constants';
+import { PAGE_SIZE, MAX_NAVIGATION_DISTANCE, DEFAULT_SOUND_FIELDS } from '../constants';
 import { SearchInput } from '../components/SearchInput';
 import { SearchResults } from '../components/SearchResults';
 import { SearchResultsHeader } from '../components/SearchResultsHeader';
@@ -28,7 +28,7 @@ export function FreesoundSearch() {
   const { getSearchResults, setSearchResults } = useSoundCache();
 
   // Update document title based on search query
-  useDocumentTitle(urlQuery ? `Search: ${urlQuery}` : 'Search');
+  useDocumentTitle(urlQuery ? `Search: ${urlQuery}` : 'Search Results');
 
   const performSearch = (searchQuery: string, page: number = 1) => {
     if (!searchQuery.trim()) {
@@ -68,7 +68,7 @@ export function FreesoundSearch() {
       searchQuery,
       {
         page_size: PAGE_SIZE,
-        fields: 'id,name,previews,images,username,tags,duration',
+        fields: DEFAULT_SOUND_FIELDS,
       },
       (data: SoundCollection) => {
         // If we need a page > 1, navigate forward using nextPage
@@ -201,15 +201,18 @@ export function FreesoundSearch() {
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Freesound Search</h2>
-
-        {/* Search Input */}
-        <SearchInput
-          query={query}
-          onQueryChange={setQuery}
-          onSearch={handleSearch}
-          loading={loading}
-        />
+        {/* Search Input - only show if no query */}
+        {!urlQuery && (
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Search Sounds</h2>
+            <SearchInput
+              query={query}
+              onQueryChange={setQuery}
+              onSearch={handleSearch}
+              loading={loading}
+            />
+          </div>
+        )}
 
         {/* Error Message */}
         {error && <ErrorMessage message={error} />}

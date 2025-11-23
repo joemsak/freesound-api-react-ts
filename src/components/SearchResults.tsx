@@ -9,7 +9,7 @@ interface SearchResultsProps {
 
 export function SearchResults({ sounds, isFavorite, onToggleFavorite }: SearchResultsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
       {sounds.results.map((sound: SoundData) => (
         <SoundCard
           key={sound.id}

@@ -6,6 +6,7 @@ interface CurrentTrack {
   name: string;
   username?: string;
   waveformUrl?: string;
+  soundId?: number;
   audioElement: HTMLAudioElement;
 }
 
