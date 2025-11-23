@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { freesound, type SoundObject } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useSoundCache } from '../contexts/SoundCacheContext';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { AudioPlayer } from './AudioPlayer';
 import { FavoriteButton } from './FavoriteButton';
@@ -12,43 +13,61 @@ import { LoadingSpinner } from './LoadingSpinner';
 
 export function SoundDetail() {
   const { soundId } = useParams<{ soundId: string }>();
-  const [sound, setSound] = useState<SoundObject | null>(null);
-  const [loading, setLoading] = useState(() => !!soundId);
-  const [error, setError] = useState<string | null>(() => (!soundId ? 'Invalid sound ID' : null));
+  const { getSound, setSound: cacheSound } = useSoundCache();
   const { toggleFavorite, isFavorite } = useFavorites();
+  
+  // Initialize from cache if available
+  const cachedSound = soundId ? getSound(parseInt(soundId)) : null;
+  const [sound, setSound] = useState<SoundObject | null>(cachedSound || null);
+  const [loading, setLoading] = useState(() => !cachedSound && !!soundId);
+  const [error, setError] = useState<string | null>(() => (!soundId ? 'Invalid sound ID' : null));
 
   useEffect(() => {
     if (!soundId) {
       return;
     }
 
-    let cancelled = false;
+    const id = parseInt(soundId);
+    
+    // Check cache first
+    const cached = getSound(id);
+    if (cached) {
+      // Already initialized from cache, no need to do anything
+      return;
+    }
 
-    const loadSound = () => {
-      freesound.getSound(
-        parseInt(soundId),
-        (data: SoundObject) => {
-          if (!cancelled) {
-            setSound(data);
-            setLoading(false);
-          }
-        },
-        (err: unknown) => {
-          if (cancelled) return;
-          const errorMessage = extractErrorMessage(err, 'Failed to load sound details.');
-          setError(errorMessage);
-          console.error('Freesound API Error:', err);
+    // Not in cache, load from API
+    let cancelled = false;
+    
+    // Use requestAnimationFrame to defer setState
+    requestAnimationFrame(() => {
+      if (!cancelled) {
+        setLoading(true);
+      }
+    });
+
+    freesound.getSound(
+      id,
+      (data: SoundObject) => {
+        if (!cancelled) {
+          setSound(data);
+          cacheSound(data); // Store in cache
           setLoading(false);
         }
-      );
-    };
-
-    loadSound();
+      },
+      (err: unknown) => {
+        if (cancelled) return;
+        const errorMessage = extractErrorMessage(err, 'Failed to load sound details.');
+        setError(errorMessage);
+        console.error('Freesound API Error:', err);
+        setLoading(false);
+      }
+    );
 
     return () => {
       cancelled = true;
     };
-  }, [soundId]);
+  }, [soundId, getSound, cacheSound]);
 
   if (loading) {
     return (

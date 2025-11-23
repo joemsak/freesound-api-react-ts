@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { freesound, type SoundObject } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useSoundCache } from '../contexts/SoundCacheContext';
 import { AudioPlayer } from './AudioPlayer';
 import { FavoriteButton } from './FavoriteButton';
 import { CloseButton } from './CloseButton';
@@ -14,6 +15,7 @@ interface FavoritesSidebarProps {
 
 export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
   const { favorites, removeFavorite } = useFavorites();
+  const { getSound, setSound: cacheSound } = useSoundCache();
   const [favoriteSounds, setFavoriteSounds] = useState<SoundObject[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -43,11 +45,24 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
     };
 
     currentFavorites.forEach((soundId) => {
+      // Check cache first
+      const cachedSound = getSound(soundId);
+      if (cachedSound) {
+        if (!cancelled) {
+          soundsMap.set(soundId, cachedSound);
+          loaded++;
+          checkComplete();
+        }
+        return;
+      }
+
+      // Not in cache, load from API
       freesound.getSound(
         soundId,
         (data: SoundObject) => {
           if (!cancelled) {
             soundsMap.set(soundId, data);
+            cacheSound(data); // Store in cache
             loaded++;
             checkComplete();
           }
@@ -64,7 +79,7 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
     return () => {
       cancelled = true;
     };
-  }, [favorites]);
+  }, [favorites, getSound, cacheSound]);
 
   if (!isOpen) {
     return null;

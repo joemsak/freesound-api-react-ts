@@ -1,5 +1,6 @@
 // Freesound API Client - TypeScript version
 // Integrated with environment variables
+import { rateLimiter } from '../utils/rateLimiter';
 
 interface SearchOptions {
   query?: string;
@@ -188,30 +189,82 @@ class FreesoundClient {
       uri = uri + '?' + paramStr.substring(1); // Remove leading &
     }
 
-    // Browser implementation
-    const xhr = new XMLHttpRequest();
+    // Execute request with rate limiting
+    const executeXHR = () => {
+      // Browser implementation
+      const xhr = new XMLHttpRequest();
 
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4 && [200, 201, 202].indexOf(xhr.status) >= 0) {
-        try {
-          const parsedData = parse_response(xhr.responseText);
-          if (success) success(parsedData);
-        } catch (e) {
-          if (error) error(e);
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 304) {
+            // Not Modified - use cached data (handled by cache layer)
+            // This shouldn't happen if we're using ETags properly
+            if (error) error(xhr);
+            return;
+          }
+          if ([200, 201, 202].indexOf(xhr.status) >= 0) {
+            try {
+              const parsedData = parse_response(xhr.responseText);
+              // Attach response headers for caching
+              const headers: Record<string, string> = {};
+              const etag = xhr.getResponseHeader('ETag');
+              const lastModified = xhr.getResponseHeader('Last-Modified');
+              const cacheControl = xhr.getResponseHeader('Cache-Control');
+              
+              if (etag) headers['ETag'] = etag;
+              if (lastModified) headers['Last-Modified'] = lastModified;
+              if (cacheControl) headers['Cache-Control'] = cacheControl;
+              
+              // Attach headers to the data if it's an object
+              if (parsedData && typeof parsedData === 'object') {
+                (parsedData as any).__headers = headers;
+              }
+              
+              if (success) success(parsedData);
+            } catch (e) {
+              if (error) error(e);
+            }
+          } else if (xhr.status === 429) {
+            // Rate limit exceeded - parse error details
+            let errorMessage = 'Rate limit exceeded. Please try again later.';
+            try {
+              const response = JSON.parse(xhr.responseText || '{}');
+              if (response.detail) {
+                errorMessage = `Rate limit exceeded: ${response.detail}`;
+              }
+            } catch {
+              // Ignore parse errors
+            }
+            
+            // Create a custom error object
+            const rateLimitError = new Error(errorMessage) as Error & { status?: number; responseText?: string };
+            rateLimitError.status = 429;
+            rateLimitError.responseText = xhr.responseText;
+            
+            if (error) error(rateLimitError);
+          } else if (xhr.status !== 200) {
+            if (error) error(xhr);
+          }
         }
-      } else if (xhr.readyState === 4 && xhr.status !== 200) {
-        if (error) error(xhr);
+      };
+
+      xhr.open(method, uri);
+      if (authHeaderToUse) {
+        xhr.setRequestHeader('Authorization', authHeaderToUse);
       }
+      if (content_type !== undefined) {
+        xhr.setRequestHeader('Content-Type', content_type);
+      }
+      xhr.send(data);
     };
 
-    xhr.open(method, uri);
-    if (authHeaderToUse) {
-      xhr.setRequestHeader('Authorization', authHeaderToUse);
-    }
-    if (content_type !== undefined) {
-      xhr.setRequestHeader('Content-Type', content_type);
-    }
-    xhr.send(data);
+    // Use rate limiter to throttle requests
+    rateLimiter.executeRequest(() => {
+      executeXHR();
+      return Promise.resolve();
+    }).catch((err) => {
+      if (error) error(err);
+    });
   }
 
   private checkOauth(): void {

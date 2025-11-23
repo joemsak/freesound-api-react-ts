@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { freesound, type SoundCollection } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useSoundCache } from '../contexts/SoundCacheContext';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { PAGE_SIZE, MAX_NAVIGATION_DISTANCE } from '../constants';
 import { SearchInput } from './SearchInput';
@@ -23,10 +24,20 @@ export function FreesoundSearch() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(urlPage);
   const { toggleFavorite, isFavorite } = useFavorites();
+  const { getSearchResults, setSearchResults } = useSoundCache();
 
   const performSearch = (searchQuery: string, page: number = 1) => {
     if (!searchQuery.trim()) {
       setError('Please enter a search query');
+      return;
+    }
+
+    // Check cache first
+    const cachedResults = getSearchResults(searchQuery, page);
+    if (cachedResults) {
+      setSounds(cachedResults);
+      setCurrentPage(page);
+      setLoading(false);
       return;
     }
 
@@ -36,6 +47,7 @@ export function FreesoundSearch() {
 
     const searchCallback = (data: SoundCollection) => {
       setSounds(data);
+      setSearchResults(searchQuery, page, data); // Cache the results
       setLoading(false);
     };
 
@@ -72,6 +84,7 @@ export function FreesoundSearch() {
               );
             } else {
               setSounds(currentData);
+              setSearchResults(searchQuery, page, currentData); // Cache the results
               setCurrentPage(page);
               setLoading(false);
             }
@@ -126,6 +139,7 @@ export function FreesoundSearch() {
       const navigate = () => {
         if (currentPageNum === urlPage) {
           setSounds(currentData);
+          setSearchResults(urlQuery, urlPage, currentData); // Cache the results
           setLoading(false);
           return;
         }
