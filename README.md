@@ -26,39 +26,6 @@ A modern React + TypeScript application for searching and exploring sounds from 
 - **Tailwind CSS** - Styling
 - **Freesound API** - Sound data and previews
 
-## Project Structure
-
-```text
-src/
-├── components/       # Reusable UI components
-│   ├── AudioPlayer.tsx
-│   ├── FixedAudioPlayer.tsx
-│   ├── SoundCard.tsx
-│   ├── SoundTitle.tsx
-│   └── ...
-├── screens/          # Page-level components
-│   ├── Home.tsx
-│   ├── FreesoundSearch.tsx
-│   ├── SoundDetail.tsx
-│   ├── UserProfile.tsx
-│   └── TagSearch.tsx
-├── contexts/         # React Context providers
-│   ├── AudioPlayerContext.tsx
-│   ├── FavoritesContext.tsx
-│   └── SoundCacheContext.tsx
-├── hooks/            # Custom React hooks
-│   ├── useAsyncEffect.ts
-│   ├── useCachedSearch.ts
-│   ├── useDocumentTitle.ts
-│   └── usePaginatedSearch.ts
-├── services/         # API clients
-│   └── freesound.ts
-└── utils/            # Utility functions
-    ├── errorHandler.ts
-    ├── rateLimiter.ts
-    └── url.ts
-```
-
 ## Getting Started
 
 ### Prerequisites
