@@ -62,8 +62,6 @@ VITE_FREESOUND_API_TOKEN=your_api_token
 
 Start the dev server with HMR:
 ```bash
-npm run dev
-# or
 vite dev
 ```
 
@@ -73,8 +71,6 @@ The app will be available at `http://localhost:5173` (Vite's default port).
 
 Build for production (outputs to `dist/`):
 ```bash
-npm run build
-# or
 vite build
 ```
 
@@ -82,8 +78,6 @@ vite build
 
 Preview the production build locally:
 ```bash
-npm run preview
-# or
 vite preview
 ```
 
