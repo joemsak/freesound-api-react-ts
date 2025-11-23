@@ -4,6 +4,8 @@ import { freesound, type SoundObject } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { AudioPlayer } from './AudioPlayer';
 import { FavoriteButton } from './FavoriteButton';
+import { CloseButton } from './CloseButton';
+import { LoadingSpinner } from './LoadingSpinner';
 
 interface FavoritesSidebarProps {
   isOpen: boolean;
@@ -84,31 +86,11 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
             {favorites.length} {favorites.length === 1 ? 'sound' : 'sounds'}
           </p>
         </div>
-        <button
-          onClick={onToggle}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-          title="Close sidebar"
-        >
-          <svg
-            className="w-5 h-5 text-gray-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+        <CloseButton onClick={onToggle} title="Close sidebar" />
       </div>
 
       {loading && favorites.length > 0 && (
-        <div className="text-center py-8 text-gray-500">
-          <p>Loading favorites...</p>
-        </div>
+        <LoadingSpinner message="Loading favorites..." />
       )}
 
       {!loading && favorites.length === 0 && (

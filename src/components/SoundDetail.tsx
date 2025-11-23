@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { freesound, type SoundObject } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { extractErrorMessage } from '../utils/errorHandler';
 import { AudioPlayer } from './AudioPlayer';
 import { FavoriteButton } from './FavoriteButton';
 import { Tags } from './Tags';
+import { SoundMetadata } from './SoundMetadata';
+import { ErrorMessage } from './ErrorMessage';
+import { LoadingSpinner } from './LoadingSpinner';
 
 export function SoundDetail() {
   const { soundId } = useParams<{ soundId: string }>();
@@ -31,17 +35,7 @@ export function SoundDetail() {
         },
         (err: unknown) => {
           if (cancelled) return;
-          let errorMessage = 'Failed to load sound details.';
-          if (err instanceof XMLHttpRequest) {
-            try {
-              const response = JSON.parse(err.responseText || '{}');
-              if (response.detail) {
-                errorMessage = `Error: ${response.detail}`;
-              }
-            } catch {
-              // Ignore parse errors
-            }
-          }
+          const errorMessage = extractErrorMessage(err, 'Failed to load sound details.');
           setError(errorMessage);
           console.error('Freesound API Error:', err);
           setLoading(false);
@@ -59,8 +53,8 @@ export function SoundDetail() {
   if (loading) {
     return (
       <div className="w-full max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <p className="text-gray-600">Loading sound details...</p>
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <LoadingSpinner message="Loading sound details..." />
         </div>
       </div>
     );
@@ -70,9 +64,7 @@ export function SoundDetail() {
     return (
       <div className="w-full max-w-4xl mx-auto p-6">
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
-          </div>
+          <ErrorMessage message={error} className="mb-4" />
           <Link
             to="/"
             className="text-blue-600 hover:text-blue-800 underline"
@@ -131,48 +123,7 @@ export function SoundDetail() {
         )}
 
         {/* Sound Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {sound.duration && (
-            <div>
-              <span className="font-semibold text-gray-700">Duration:</span>{' '}
-              <span className="text-gray-600">{sound.duration.toFixed(2)}s</span>
-            </div>
-          )}
-          {sound.filesize && (
-            <div>
-              <span className="font-semibold text-gray-700">File Size:</span>{' '}
-              <span className="text-gray-600">
-                {(sound.filesize / 1024).toFixed(2)} KB
-              </span>
-            </div>
-          )}
-          {sound.samplerate && (
-            <div>
-              <span className="font-semibold text-gray-700">Sample Rate:</span>{' '}
-              <span className="text-gray-600">{sound.samplerate} Hz</span>
-            </div>
-          )}
-          {sound.bitrate && (
-            <div>
-              <span className="font-semibold text-gray-700">Bitrate:</span>{' '}
-              <span className="text-gray-600">{sound.bitrate} kbps</span>
-            </div>
-          )}
-          {sound.channels && (
-            <div>
-              <span className="font-semibold text-gray-700">Channels:</span>{' '}
-              <span className="text-gray-600">
-                {sound.channels === 1 ? 'Mono' : 'Stereo'}
-              </span>
-            </div>
-          )}
-          {sound.license && (
-            <div>
-              <span className="font-semibold text-gray-700">License:</span>{' '}
-              <span className="text-gray-600">{sound.license}</span>
-            </div>
-          )}
-        </div>
+        <SoundMetadata sound={sound} />
 
         {/* Description */}
         {sound.description && (

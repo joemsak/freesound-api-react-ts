@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom';
 import { type SoundCollection } from '../services/freesound';
+import { calculatePageNumbers } from '../utils/pagination';
+import { buildSearchUrl } from '../utils/url';
+import { PAGE_SIZE, MAX_VISIBLE_PAGES } from '../constants';
 
 interface PaginationProps {
   sounds: SoundCollection;
@@ -16,44 +19,8 @@ export function Pagination({
   loading,
   onPageChange,
 }: PaginationProps) {
-  const totalPages = Math.ceil(sounds.count / 10);
-
-  const getPageNumbers = (): (number | string)[] => {
-    const pages: (number | string)[] = [];
-    const maxVisible = 7;
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-
-      if (currentPage <= 4) {
-        for (let i = 2; i <= 5; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 3) {
-        pages.push('...');
-        for (let i = totalPages - 4; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
-
-  const pageNumbers = getPageNumbers();
+  const totalPages = Math.ceil(sounds.count / PAGE_SIZE);
+  const pageNumbers = calculatePageNumbers(currentPage, totalPages, MAX_VISIBLE_PAGES);
 
   if (sounds.count === 0) {
     return null;
@@ -64,7 +31,7 @@ export function Pagination({
       {/* Previous Button */}
       {sounds.previous && (
         <Link
-          to={`/?q=${encodeURIComponent(urlQuery)}&page=${currentPage - 1}`}
+          to={buildSearchUrl(urlQuery, currentPage - 1)}
           onClick={(e) => {
             e.preventDefault();
             if (loading) return;
@@ -92,7 +59,7 @@ export function Pagination({
         return (
           <Link
             key={pageNum}
-            to={`/?q=${encodeURIComponent(urlQuery)}&page=${pageNum}`}
+            to={buildSearchUrl(urlQuery, pageNum)}
             onClick={(e) => {
               e.preventDefault();
               if (loading || isActive) return;
@@ -112,7 +79,7 @@ export function Pagination({
       {/* Next Button */}
       {sounds.next && (
         <Link
-          to={`/?q=${encodeURIComponent(urlQuery)}&page=${currentPage + 1}`}
+          to={buildSearchUrl(urlQuery, currentPage + 1)}
           onClick={(e) => {
             e.preventDefault();
             if (loading) return;

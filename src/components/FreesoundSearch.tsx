@@ -2,10 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { freesound, type SoundCollection } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { extractErrorMessage } from '../utils/errorHandler';
+import { PAGE_SIZE, MAX_NAVIGATION_DISTANCE } from '../constants';
 import { SearchInput } from './SearchInput';
 import { SearchResults } from './SearchResults';
 import { SearchResultsHeader } from './SearchResultsHeader';
 import { Pagination } from './Pagination';
+import { ErrorMessage } from './ErrorMessage';
+import { EmptyState } from './EmptyState';
 
 export function FreesoundSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -36,37 +40,22 @@ export function FreesoundSearch() {
     };
 
     const errorCallback = (err: unknown) => {
-      let errorMessage = 'Failed to search sounds. Please try again.';
-      if (err instanceof XMLHttpRequest) {
-        if (err.status === 401) {
-          errorMessage = 'Authentication failed. The API requires a valid OAuth2 token. Please check your credentials or authenticate via OAuth2.';
-        } else if (err.status === 400) {
-          errorMessage = 'Invalid request. Please check your API credentials.';
-        }
-        try {
-          const response = JSON.parse(err.responseText || '{}');
-          if (response.detail) {
-            errorMessage = `API Error: ${response.detail}`;
-          }
-        } catch {
-          // Ignore parse errors
-        }
-      }
+      const errorMessage = extractErrorMessage(err, 'Failed to search sounds. Please try again.');
       setError(errorMessage);
       console.error('Freesound API Error:', err);
       setLoading(false);
     };
 
-    // Always do a fresh search - pagination will be handled via URL changes
-    // The Freesound API handles pagination internally via next/previous URLs
+    // Freesound API uses next/previous URLs for pagination, not direct page numbers
+    // Always start from page 1, then navigate if needed
     freesound.textSearch(
       searchQuery,
       {
-        page_size: 10,
+        page_size: PAGE_SIZE,
         fields: 'id,name,previews,images,username,tags,duration',
       },
       (data: SoundCollection) => {
-        // If we're on a page > 1, navigate forward using nextPage
+        // If we need a page > 1, navigate forward using nextPage
         if (page > 1 && data.next) {
           let currentData = data;
           let currentPageNum = 1;
@@ -74,7 +63,6 @@ export function FreesoundSearch() {
           const navigateForward = () => {
             if (currentPageNum < page && currentData.next) {
               currentPageNum++;
-              setLoading(true);
               currentData.nextPage(
                 (nextData: SoundCollection) => {
                   currentData = nextData;
@@ -112,87 +100,84 @@ export function FreesoundSearch() {
 
   // Initialize from URL on mount and sync when URL changes
   useEffect(() => {
-    if (urlQuery) {
-      if (!initializedRef.current) {
-        initializedRef.current = true;
-        setQuery(urlQuery);
-      }
-      // Sync query input with URL if it changed
-      if (query !== urlQuery) {
-        setQuery(urlQuery);
-      }
-      // Update current page from URL
+    if (!urlQuery) return;
+
+    // Sync query input with URL
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      setQuery(urlQuery);
+    } else if (query !== urlQuery) {
+      setQuery(urlQuery);
+    }
+
+    // Check if we can navigate from current page or need a fresh search
+    const pageDiff = urlPage - currentPage;
+    const canNavigateFromCurrent = sounds && Math.abs(pageDiff) <= MAX_NAVIGATION_DISTANCE && pageDiff !== 0;
+
+    if (canNavigateFromCurrent && sounds) {
+      // Navigate using nextPage/previousPage for small page differences
+      setLoading(true);
       setCurrentPage(urlPage);
-      // Perform search
+      
+      let currentData = sounds;
+      let currentPageNum = currentPage;
+      const direction = pageDiff > 0 ? 'next' : 'previous';
+
+      const navigate = () => {
+        if (currentPageNum === urlPage) {
+          setSounds(currentData);
+          setLoading(false);
+          return;
+        }
+
+        if (direction === 'next' && currentData.next) {
+          currentPageNum++;
+          currentData.nextPage(
+            (data: SoundCollection) => {
+              currentData = data;
+              navigate();
+            },
+            () => {
+              // Fallback to fresh search on error
+              performSearch(urlQuery, urlPage);
+            }
+          );
+        } else if (direction === 'previous' && currentData.previous) {
+          currentPageNum--;
+          currentData.previousPage(
+            (data: SoundCollection) => {
+              currentData = data;
+              navigate();
+            },
+            () => {
+              // Fallback to fresh search on error
+              performSearch(urlQuery, urlPage);
+            }
+          );
+        } else {
+          // Can't navigate, do fresh search
+          performSearch(urlQuery, urlPage);
+        }
+      };
+
+      navigate();
+    } else {
+      // Fresh search or large page jump
+      setCurrentPage(urlPage);
       performSearch(urlQuery, urlPage);
     }
-    // We intentionally don't include 'query' to avoid infinite loops
+    // We intentionally don't include 'query' and 'sounds' to avoid infinite loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlQuery, urlPage]);
 
   const navigateToPage = (page: number) => {
     if (loading || page === currentPage || page < 1) return;
 
-    const totalPages = sounds ? Math.ceil(sounds.count / 10) : 1;
+    const totalPages = sounds ? Math.ceil(sounds.count / PAGE_SIZE) : 1;
     if (page > totalPages) return;
 
+    // Update URL - the useEffect will handle the search
     setSearchParams({ q: urlQuery, page: page.toString() });
-    setLoading(true);
-
-    const pageDiff = page - currentPage;
-    if (pageDiff === 0) {
-      setLoading(false);
-      return;
-    }
-
-    if (!sounds) {
-      setLoading(false);
-      return;
-    }
-
-    let currentData = sounds;
-    let currentPageNum = currentPage;
-
-    const navigate = () => {
-      if (currentPageNum === page) {
-        setSounds(currentData);
-        setCurrentPage(page);
-        setLoading(false);
-        return;
-      }
-
-      if (pageDiff > 0 && currentData.next) {
-        currentPageNum++;
-        currentData.nextPage(
-          (data: SoundCollection) => {
-            currentData = data;
-            navigate();
-          },
-          (err: unknown) => {
-            setError('Failed to load page');
-            console.error('Pagination error:', err);
-            setLoading(false);
-          }
-        );
-      } else if (pageDiff < 0 && currentData.previous) {
-        currentPageNum--;
-        currentData.previousPage(
-          (data: SoundCollection) => {
-            currentData = data;
-            navigate();
-          },
-          (err: unknown) => {
-            setError('Failed to load page');
-            console.error('Pagination error:', err);
-            setLoading(false);
-          }
-        );
-      } else {
-        setLoading(false);
-      }
-    };
-
-    navigate();
   };
 
   return (
@@ -209,11 +194,7 @@ export function FreesoundSearch() {
         />
 
         {/* Error Message */}
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
-          </div>
-        )}
+        {error && <ErrorMessage message={error} />}
 
         {/* Results */}
         {sounds && (
@@ -239,9 +220,7 @@ export function FreesoundSearch() {
 
         {/* Empty State */}
         {!sounds && !loading && !error && (
-          <div className="text-center py-12 text-gray-500">
-            <p>Enter a search query to find sounds on Freesound</p>
-          </div>
+          <EmptyState message="Enter a search query to find sounds on Freesound" />
         )}
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { PAGE_SIZE } from '../constants';
+
 interface SearchResultsHeaderProps {
   count: number;
   currentPage: number;
@@ -7,7 +9,7 @@ interface SearchResultsHeaderProps {
 export function SearchResultsHeader({
   count,
   currentPage,
-  pageSize = 10,
+  pageSize = PAGE_SIZE,
 }: SearchResultsHeaderProps) {
   const totalPages = Math.ceil(count / pageSize);
 
