@@ -4,13 +4,14 @@ import { freesound, type SoundCollection } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useSoundCache } from '../contexts/SoundCacheContext';
 import { extractErrorMessage } from '../utils/errorHandler';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PAGE_SIZE, MAX_NAVIGATION_DISTANCE } from '../constants';
-import { SearchInput } from './SearchInput';
-import { SearchResults } from './SearchResults';
-import { SearchResultsHeader } from './SearchResultsHeader';
-import { Pagination } from './Pagination';
-import { ErrorMessage } from './ErrorMessage';
-import { EmptyState } from './EmptyState';
+import { SearchInput } from '../components/SearchInput';
+import { SearchResults } from '../components/SearchResults';
+import { SearchResultsHeader } from '../components/SearchResultsHeader';
+import { Pagination } from '../components/Pagination';
+import { ErrorMessage } from '../components/ErrorMessage';
+import { EmptyState } from '../components/EmptyState';
 
 export function FreesoundSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,6 +26,9 @@ export function FreesoundSearch() {
   const [currentPage, setCurrentPage] = useState(urlPage);
   const { toggleFavorite, isFavorite } = useFavorites();
   const { getSearchResults, setSearchResults } = useSoundCache();
+
+  // Update document title based on search query
+  useDocumentTitle(urlQuery ? `Search: ${urlQuery}` : 'Search');
 
   const performSearch = (searchQuery: string, page: number = 1) => {
     if (!searchQuery.trim()) {

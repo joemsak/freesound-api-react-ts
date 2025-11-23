@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { FreesoundSearch } from './components/FreesoundSearch';
-import { SoundDetail } from './components/SoundDetail';
+import { FreesoundSearch } from './screens/FreesoundSearch';
+import { SoundDetail } from './screens/SoundDetail';
 import { FavoritesSidebar } from './components/FavoritesSidebar';
 import { Navigation } from './components/Navigation';
 

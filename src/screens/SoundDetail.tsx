@@ -4,12 +4,13 @@ import { freesound, type SoundObject } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useSoundCache } from '../contexts/SoundCacheContext';
 import { extractErrorMessage } from '../utils/errorHandler';
-import { AudioPlayer } from './AudioPlayer';
-import { FavoriteButton } from './FavoriteButton';
-import { Tags } from './Tags';
-import { SoundMetadata } from './SoundMetadata';
-import { ErrorMessage } from './ErrorMessage';
-import { LoadingSpinner } from './LoadingSpinner';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { AudioPlayer } from '../components/AudioPlayer';
+import { FavoriteButton } from '../components/FavoriteButton';
+import { Tags } from '../components/Tags';
+import { SoundMetadata } from '../components/SoundMetadata';
+import { ErrorMessage } from '../components/ErrorMessage';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 export function SoundDetail() {
   const { soundId } = useParams<{ soundId: string }>();
@@ -21,6 +22,9 @@ export function SoundDetail() {
   const [sound, setSound] = useState<SoundObject | null>(cachedSound || null);
   const [loading, setLoading] = useState(() => !cachedSound && !!soundId);
   const [error, setError] = useState<string | null>(() => (!soundId ? 'Invalid sound ID' : null));
+
+  // Update document title
+  useDocumentTitle(sound?.name || (loading ? 'Loading...' : 'Sound Details'));
 
   useEffect(() => {
     if (!soundId) {
