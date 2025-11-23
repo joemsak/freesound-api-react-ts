@@ -64,7 +64,7 @@ Start the dev server with HMR:
 ```bash
 npm run dev
 # or
-vite
+vite dev
 ```
 
 The app will be available at `http://localhost:5173` (Vite's default port).
