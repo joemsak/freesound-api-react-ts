@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '../test/test-utils'
+import { render, screen } from '../test/test-utils'
 import { TagSearch } from './TagSearch'
 import * as FavoritesContext from '../contexts/FavoritesContext'
 import * as SoundCacheContext from '../contexts/SoundCacheContext'
@@ -21,9 +21,9 @@ vi.mock('../contexts/SoundCacheContext', async () => {
   return {
     ...actual,
     useSoundCache: () => ({
-      getSound: vi.fn(),
+      getSound: vi.fn(() => undefined),
       setSound: vi.fn(),
-      getSearchResults: vi.fn(),
+      getSearchResults: vi.fn(() => undefined), // Return undefined to force API call
       setSearchResults: vi.fn(),
     }),
   }
@@ -32,14 +32,13 @@ vi.mock('../contexts/SoundCacheContext', async () => {
 vi.mock('../services/freesound', () => ({
   freesound: {
     textSearch: vi.fn((query, options, success) => {
-      setTimeout(() => {
-        success({
-          results: [],
-          count: 0,
-          next: null,
-          previous: null,
-        })
-      }, 0)
+      // Call success immediately
+      success({
+        results: [],
+        count: 0,
+        next: null,
+        previous: null,
+      })
     }),
   },
 }))
@@ -54,19 +53,11 @@ describe('TagSearch Component', () => {
     expect(screen.getByText(/invalid tag name/i)).toBeInTheDocument()
   })
 
-  it('renders tag search with tag name', async () => {
+  it('renders tag search with tag name', () => {
     render(<TagSearch />, { initialEntries: ['/tag/music'] })
-
-    await waitFor(() => {
-      expect(screen.getByText(/tag:/i)).toBeInTheDocument()
-      expect(screen.getByText('music')).toBeInTheDocument()
-    })
-  })
-
-  it('displays loading state initially', () => {
-    render(<TagSearch />, { initialEntries: ['/tag/music'] })
-    // ScreenLayout handles loading state, so we just verify it renders
-    expect(screen.getByText(/music/i)).toBeInTheDocument()
+    // Tag name appears in the header - wait for it to render
+    expect(screen.getByText(/tag:/i)).toBeInTheDocument()
+    expect(screen.getByText('music')).toBeInTheDocument()
   })
 })
 

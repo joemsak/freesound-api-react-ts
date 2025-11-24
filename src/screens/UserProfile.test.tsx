@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '../test/test-utils'
+import { render, screen } from '../test/test-utils'
 import { UserProfile } from './UserProfile'
 import * as FavoritesContext from '../contexts/FavoritesContext'
 import * as SoundCacheContext from '../contexts/SoundCacheContext'
@@ -21,9 +21,9 @@ vi.mock('../contexts/SoundCacheContext', async () => {
   return {
     ...actual,
     useSoundCache: () => ({
-      getSound: vi.fn(),
+      getSound: vi.fn(() => undefined),
       setSound: vi.fn(),
-      getSearchResults: vi.fn(),
+      getSearchResults: vi.fn(() => undefined), // Return undefined to force API call
       setSearchResults: vi.fn(),
     }),
   }
@@ -32,14 +32,13 @@ vi.mock('../contexts/SoundCacheContext', async () => {
 vi.mock('../services/freesound', () => ({
   freesound: {
     textSearch: vi.fn((query, options, success) => {
-      setTimeout(() => {
-        success({
-          results: [],
-          count: 0,
-          next: null,
-          previous: null,
-        })
-      }, 0)
+      // Call success immediately
+      success({
+        results: [],
+        count: 0,
+        next: null,
+        previous: null,
+      })
     }),
   },
 }))
@@ -54,18 +53,10 @@ describe('UserProfile Component', () => {
     expect(screen.getByText(/invalid username/i)).toBeInTheDocument()
   })
 
-  it('renders user profile with username', async () => {
+  it('renders user profile with username', () => {
     render(<UserProfile />, { initialEntries: ['/user/testuser'] })
-
-    await waitFor(() => {
-      expect(screen.getByText('testuser')).toBeInTheDocument()
-    })
-  })
-
-  it('displays loading state initially', () => {
-    render(<UserProfile />, { initialEntries: ['/user/testuser'] })
-    // ScreenLayout handles loading state, so we just verify it renders
-    expect(screen.getByText(/testuser/i)).toBeInTheDocument()
+    // Username appears in the header
+    expect(screen.getByText('testuser')).toBeInTheDocument()
   })
 })
 

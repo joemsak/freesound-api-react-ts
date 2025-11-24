@@ -21,9 +21,9 @@ vi.mock('../contexts/SoundCacheContext', async () => {
   return {
     ...actual,
     useSoundCache: () => ({
-      getSound: vi.fn(),
+      getSound: vi.fn(() => undefined),
       setSound: vi.fn(),
-      getSearchResults: vi.fn(),
+      getSearchResults: vi.fn(() => undefined), // Return undefined to force API call
       setSearchResults: vi.fn(),
     }),
   }
@@ -32,14 +32,13 @@ vi.mock('../contexts/SoundCacheContext', async () => {
 vi.mock('../services/freesound', () => ({
   freesound: {
     textSearch: vi.fn((query, options, success) => {
-      setTimeout(() => {
-        success({
-          results: [],
-          count: 0,
-          next: null,
-          previous: null,
-        })
-      }, 0)
+      // Call success immediately
+      success({
+        results: [],
+        count: 0,
+        next: null,
+        previous: null,
+      })
     }),
   },
 }))
