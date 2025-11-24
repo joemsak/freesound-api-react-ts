@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -8,6 +9,7 @@ export default defineConfig({
   // For GitHub Pages: use repo name as base path
   // For custom domain or other hosting: set base to '/'
   base: process.env.NODE_ENV === 'production' ? '/freesound-api-react-ts/' : '/',
+  // @ts-expect-error - Vitest config properties are not in Vite types
   test: {
     globals: true,
     environment: 'jsdom',
@@ -39,7 +41,6 @@ export default defineConfig({
         '**/*.test.*',
         '**/*.spec.*',
       ],
-      all: false,
       include: ['src/**/*.{ts,tsx}'],
     },
   },
