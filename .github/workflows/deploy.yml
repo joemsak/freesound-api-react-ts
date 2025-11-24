@@ -37,7 +37,7 @@ jobs:
         run: npm run type-check
 
       - name: Run tests
-        run: npm run test:run
+        run: npm run test
 
       - name: Verify secrets are set
         run: |

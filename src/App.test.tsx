@@ -1,63 +1,69 @@
+import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from './test/test-utils'
+import { MemoryRouter } from 'react-router-dom'
+import { FavoritesProvider } from './contexts/FavoritesContext'
+import { SoundCacheProvider } from './contexts/SoundCacheContext'
+import { AudioPlayerProvider } from './contexts/AudioPlayerContext'
 import App from './App'
-import * as FavoritesContext from './contexts/FavoritesContext'
-import * as SoundCacheContext from './contexts/SoundCacheContext'
-import * as AudioPlayerContext from './contexts/AudioPlayerContext'
 
-vi.mock('./contexts/FavoritesContext', async () => {
-  const actual = await vi.importActual<typeof FavoritesContext>('./contexts/FavoritesContext')
-  return {
-    ...actual,
-    useFavorites: () => ({
-      favorites: [],
-      toggleFavorite: vi.fn(),
-      isFavorite: vi.fn(() => false),
-    }),
-  }
-})
+vi.mock('./contexts/FavoritesContext', () => ({
+  __esModule: true,
+  useFavorites: () => ({
+    favorites: [],
+    toggleFavorite: vi.fn(),
+    isFavorite: vi.fn(() => false),
+  }),
+  FavoritesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
 
-vi.mock('./contexts/SoundCacheContext', async () => {
-  const actual = await vi.importActual<typeof SoundCacheContext>('./contexts/SoundCacheContext')
-  return {
-    ...actual,
-    useSoundCache: () => ({
-      getSound: vi.fn(),
-      setSound: vi.fn(),
-      getSearchResults: vi.fn(),
-      setSearchResults: vi.fn(),
-    }),
-  }
-})
+vi.mock('./contexts/SoundCacheContext', () => ({
+  __esModule: true,
+  useSoundCache: () => ({
+    getSound: vi.fn(),
+    setSound: vi.fn(),
+    getSearchResults: vi.fn(),
+    setSearchResults: vi.fn(),
+  }),
+  SoundCacheProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
 
-vi.mock('./contexts/AudioPlayerContext', async () => {
-  const actual = await vi.importActual<typeof AudioPlayerContext>('./contexts/AudioPlayerContext')
-  return {
-    ...actual,
-    useAudioPlayer: () => ({
-      playSound: vi.fn(),
-      pauseCurrent: vi.fn(),
-    }),
-  }
-})
+vi.mock('./contexts/AudioPlayerContext', () => ({
+  __esModule: true,
+  useAudioPlayer: () => ({
+    playSound: vi.fn(),
+    pauseCurrent: vi.fn(),
+  }),
+  AudioPlayerProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
 
 vi.mock('./screens/Home', () => ({
+  __esModule: true,
+  default: () => <div data-testid="home-screen">Home Screen</div>,
   Home: () => <div data-testid="home-screen">Home Screen</div>,
 }))
 
 vi.mock('./screens/FreesoundSearch', () => ({
+  __esModule: true,
+  default: () => <div data-testid="search-screen">Search Screen</div>,
   FreesoundSearch: () => <div data-testid="search-screen">Search Screen</div>,
 }))
 
 vi.mock('./screens/SoundDetail', () => ({
+  __esModule: true,
+  default: () => <div data-testid="sound-detail-screen">Sound Detail Screen</div>,
   SoundDetail: () => <div data-testid="sound-detail-screen">Sound Detail Screen</div>,
 }))
 
 vi.mock('./screens/UserProfile', () => ({
+  __esModule: true,
+  default: () => <div data-testid="user-profile-screen">User Profile Screen</div>,
   UserProfile: () => <div data-testid="user-profile-screen">User Profile Screen</div>,
 }))
 
 vi.mock('./screens/TagSearch', () => ({
+  __esModule: true,
+  default: () => <div data-testid="tag-search-screen">Tag Search Screen</div>,
   TagSearch: () => <div data-testid="tag-search-screen">Tag Search Screen</div>,
 }))
 
@@ -97,13 +103,23 @@ describe('App Routing Integration Tests', () => {
   })
 
   it('updates route when navigating between pages', () => {
-    render(<App />, { initialEntries: ['/'] })
+    const { rerender } = render(<App />, { initialEntries: ['/'] })
 
     expect(screen.getByTestId('home-screen')).toBeInTheDocument()
 
-    const { unmount } = render(<App />, { initialEntries: ['/search'] })
+    // Re-render with new route - wrap in providers since rerender doesn't use wrapper
+    rerender(
+      <MemoryRouter initialEntries={['/search']}>
+        <SoundCacheProvider>
+          <FavoritesProvider>
+            <AudioPlayerProvider>
+              <App />
+            </AudioPlayerProvider>
+          </FavoritesProvider>
+        </SoundCacheProvider>
+      </MemoryRouter>
+    )
     expect(screen.getByTestId('search-screen')).toBeInTheDocument()
-    unmount()
   })
 })
 
