@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '../test/test-utils'
+import { render, screen, waitFor } from '../test/test-utils'
 import { FreesoundSearch } from './FreesoundSearch'
 import * as FavoritesContext from '../contexts/FavoritesContext'
 import * as SoundCacheContext from '../contexts/SoundCacheContext'
@@ -53,11 +53,18 @@ describe('FreesoundSearch Component', () => {
     expect(screen.getByPlaceholderText(/search for sounds/i)).toBeInTheDocument()
   })
 
-  it('renders search input when query is provided', () => {
+  it('renders search input when query is provided', async () => {
     render(<FreesoundSearch />, { initialEntries: ['/search?q=test'] })
-    // Component renders - exact content depends on API response timing
-    // Just verify it doesn't crash
-    expect(screen.getByPlaceholderText(/search for sounds/i)).toBeInTheDocument()
+    // When query is provided, SearchInput is hidden but results header should appear
+    // Wait for API call to complete
+    await waitFor(() => {
+      // Either results header or empty state should appear
+      const hasResults = screen.queryByText(/showing/i) !== null
+      const hasEmpty = screen.queryByText(/no sounds found/i) !== null
+      expect(hasResults || hasEmpty).toBe(true)
+    }, { timeout: 1000 })
+    // SearchInput is hidden when query exists, so verify query appears in results
+    expect(screen.getByText(/test/i)).toBeInTheDocument()
   })
 
   it('displays empty state when no query', () => {
