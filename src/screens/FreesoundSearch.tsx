@@ -28,6 +28,24 @@ export function FreesoundSearch() {
   const [currentPage, setCurrentPage] = useState(urlPage);
   const { toggleFavorite, isFavorite } = useFavorites();
   const { getSearchResults, setSearchResults } = useSoundCache();
+  
+  // Use refs for values that shouldn't trigger effect re-runs
+  const currentPageRef = useRef(currentPage);
+  const soundsRef = useRef(sounds);
+  const queryRef = useRef(query);
+  
+  // Keep refs in sync
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
+  
+  useEffect(() => {
+    soundsRef.current = sounds;
+  }, [sounds]);
+  
+  useEffect(() => {
+    queryRef.current = query;
+  }, [query]);
 
   // Update document title based on search query
   useDocumentTitle(urlQuery ? `Search: ${urlQuery}` : 'Search Results');
@@ -134,8 +152,10 @@ export function FreesoundSearch() {
     if (!initializedRef.current) {
       initializedRef.current = true;
       setQuery(urlQuery);
-    } else if (query !== urlQuery) {
+      queryRef.current = urlQuery;
+    } else if (queryRef.current !== urlQuery) {
       setQuery(urlQuery);
+      queryRef.current = urlQuery;
     }
 
     // Check if this is the same search we just did
@@ -166,18 +186,18 @@ export function FreesoundSearch() {
     }
 
     // Same query, different page - check if we can navigate from current page
-    const pageDiff = urlPage - currentPage;
-    const canNavigateFromCurrent = sounds && 
+    const pageDiff = urlPage - currentPageRef.current;
+    const canNavigateFromCurrent = soundsRef.current && 
                                    Math.abs(pageDiff) <= MAX_NAVIGATION_DISTANCE && 
                                    pageDiff !== 0;
 
-    if (canNavigateFromCurrent && sounds) {
+    if (canNavigateFromCurrent && soundsRef.current) {
       // Navigate using nextPage/previousPage for small page differences
       setLoading(true);
       setCurrentPage(urlPage);
       
-      let currentData = sounds;
-      let currentPageNum = currentPage;
+      let currentData = soundsRef.current;
+      let currentPageNum = currentPageRef.current;
       const direction = pageDiff > 0 ? 'next' : 'previous';
 
       const navigate = () => {
@@ -228,8 +248,7 @@ export function FreesoundSearch() {
       setCurrentPage(urlPage);
       performSearch(urlQuery, urlPage);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlQuery, urlPage, performSearch]);
+  }, [urlQuery, urlPage, performSearch, setSearchResults]);
 
   const navigateToPage = (page: number) => {
     if (loading || page === currentPage || page < 1) return;
