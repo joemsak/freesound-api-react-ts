@@ -22,15 +22,9 @@ export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps
   // Sync query with URL when on search page
   useEffect(() => {
     if (location.pathname === '/search') {
-      // Defer setState to avoid cascading renders
-      requestAnimationFrame(() => {
-        setQuery(urlQuery);
-      });
+      setQuery(urlQuery);
     } else {
-      // Clear query when not on search page
-      requestAnimationFrame(() => {
-        setQuery('');
-      });
+      setQuery('');
     }
   }, [location.pathname, urlQuery]);
 

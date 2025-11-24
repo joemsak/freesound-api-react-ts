@@ -11,9 +11,10 @@ import { FixedAudioPlayer } from './components/FixedAudioPlayer';
 
 function AppRoutes() {
   const location = useLocation();
-  // Force Routes to update when location changes
+  // Use location to ensure Routes re-renders when location changes
+  // This is necessary to ensure React Router properly updates the rendered component
   return (
-    <Routes location={location} key={location.pathname}>
+    <Routes location={location}>
       <Route path="/" element={<Home />} />
       <Route path="/search" element={<FreesoundSearch />} />
       <Route path="/sound/:soundId" element={<SoundDetail />} />
