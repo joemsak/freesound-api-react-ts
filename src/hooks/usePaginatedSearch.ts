@@ -27,13 +27,11 @@ export function usePaginatedSearch({
   page,
 }: UsePaginatedSearchOptions): UsePaginatedSearchResult {
   const { getSearchResults, setSearchResults } = useSoundCache();
-  
-  // Initialize state from cache using lazy initializer
+
   const [sounds, setSounds] = useState<SoundCollection | null>(() => {
     return getSearchResults(cacheKey, page) || null;
   });
   const [loading, setLoading] = useState(() => {
-    // Always start loading, useEffect will set to false if cache exists
     return true;
   });
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +41,6 @@ export function usePaginatedSearch({
   const previousCacheKeyRef = useRef<string | undefined>(undefined);
   const previousPageRef = useRef<number | undefined>(undefined);
 
-  // Keep refs up to date
   useEffect(() => {
     searchFnRef.current = searchFn;
     defaultErrorMessageRef.current = defaultErrorMessage;
@@ -101,15 +98,12 @@ export function usePaginatedSearch({
     setError(null);
     setLoading(true);
 
-    // Check cache first
     const cachedResults = getSearchResults(cacheKey, page);
     if (cachedResults) {
       setSounds(cachedResults);
       setLoading(false);
       return;
     }
-    
-    // Not in cache, need to fetch
 
     searchFnRef.current(
       (data: SoundCollection) => {

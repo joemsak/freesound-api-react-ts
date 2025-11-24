@@ -22,7 +22,6 @@ function AppRoutes() {
 }
 
 function App() {
-  // Access environment variables using import.meta.env
   const clientId = import.meta.env.VITE_FREESOUND_CLIENT_ID;
   const clientSecret = import.meta.env.VITE_FREESOUND_CLIENT_SECRET;
   const hasCredentials = !!(clientId && clientSecret);
@@ -30,16 +29,13 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 relative">
-      {/* App-wide Navigation */}
       <Navigation
         onToggleFavorites={() => setSidebarOpen(!sidebarOpen)}
         favoritesOpen={sidebarOpen}
       />
 
-      {/* Main Content Area - with conditional right margin for sidebar and bottom padding for fixed player */}
       <div className={`py-8 pb-24 transition-all ${sidebarOpen ? 'md:pr-96' : ''}`}>
         <div className="container mx-auto px-4">
-          {/* Credentials Status */}
           {!hasCredentials && import.meta.env.DEV && (
             <div className="max-w-4xl mx-auto mb-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded-lg">
               <p className="font-semibold">⚠️ Missing API Credentials</p>
@@ -52,15 +48,12 @@ function App() {
             </div>
           )}
 
-          {/* Routes */}
           <AppRoutes />
         </div>
       </div>
 
-      {/* Favorites Sidebar */}
       <FavoritesSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
-      {/* Fixed Audio Player Footer */}
       <FixedAudioPlayer />
     </div>
   );

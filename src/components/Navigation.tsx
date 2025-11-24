@@ -13,11 +13,8 @@ export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { favorites } = useFavorites();
-  // Check if we're on the home page
-  // React Router with basename automatically strips the basename from pathname
   const isHomePage = location.pathname === '/';
   const urlQuery = searchParams.get('q') || '';
-  // Derive query from URL - only use local state for user input before search
   const [localQuery, setLocalQuery] = useState('');
   const query = location.pathname === '/search' ? urlQuery : localQuery;
 
@@ -25,7 +22,6 @@ export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps
     const trimmedQuery = query.trim();
     if (trimmedQuery) {
       navigate(`/search?q=${encodeURIComponent(trimmedQuery)}&page=1`);
-      // Don't clear query here - let useEffect sync it
     }
   };
 
@@ -33,7 +29,6 @@ export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps
     <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 gap-4">
-          {/* Logo/Title */}
           <Link
             to="/"
             className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors cursor-pointer flex-shrink-0"
@@ -54,7 +49,6 @@ export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps
             <span className="text-xl font-bold">Freesound</span>
           </Link>
 
-          {/* Search Bar */}
           <div className="flex-1 max-w-2xl flex items-center">
             <SearchInput
               query={query}
@@ -64,9 +58,7 @@ export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps
             />
           </div>
 
-          {/* Navigation Links */}
           <div className="flex items-center gap-4 flex-shrink-0">
-            {/* Home Link */}
             {!isHomePage && (
               <Link
                 to="/"
@@ -76,7 +68,6 @@ export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps
               </Link>
             )}
 
-            {/* Favorites Toggle Button */}
             <button
               onClick={onToggleFavorites}
               className="relative px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2 cursor-pointer"

@@ -48,8 +48,7 @@ export function SoundDetail() {
   const { toggleFavorite, isFavorite } = useFavorites();
   const cancelledRef = useRef(false);
   const previousSoundIdRef = useRef<string | undefined>(undefined);
-  
-  // Initialize state from cache using lazy initializer
+
   const [state, dispatch] = useReducer(soundDetailReducer, null, () => {
     if (!soundId) {
       return { sound: null, loading: false, error: 'Invalid sound ID' };
@@ -62,10 +61,8 @@ export function SoundDetail() {
     return { sound: cached || null, loading: !cached, error: null };
   });
 
-  // Update document title
   useDocumentTitle(state.sound?.name || (state.loading ? 'Loading...' : 'Sound Details'));
 
-  // Sanitize HTML description
   const sanitizedDescription = useMemo(() => {
     if (!state.sound?.description) return '';
     return DOMPurify.sanitize(state.sound.description, {
@@ -75,43 +72,36 @@ export function SoundDetail() {
   }, [state.sound]);
 
   useEffect(() => {
-    // Skip if soundId hasn't changed
     if (previousSoundIdRef.current === soundId) {
       return;
     }
     previousSoundIdRef.current = soundId;
-    
+
     if (!soundId) {
-      // Invalid sound ID - state already initialized correctly
       return;
     }
 
     const id = parseInt(soundId);
     if (isNaN(id)) {
-      // Invalid sound ID - state already initialized correctly
       return;
     }
-    
+
     cancelledRef.current = false;
-    
-    // Check cache first
+
     const cached = getSound(id);
     if (cached) {
-      // Update state with cached sound using reducer
       dispatch({ type: 'SET_CACHED_SOUND', payload: cached });
       return;
     }
-    
-    // Not in cache, need to load from API
+
     dispatch({ type: 'RESET' });
 
-    // Not in cache, load from API
     freesound.getSound(
       id,
       (data: SoundObject) => {
         if (!cancelledRef.current) {
           dispatch({ type: 'SET_API_SOUND', payload: data });
-          cacheSound(data); // Store in cache
+          cacheSound(data);
         }
       },
       (err: unknown) => {
@@ -137,7 +127,6 @@ export function SoundDetail() {
       {state.sound && (
         <div className="w-full max-w-4xl mx-auto p-6">
           <div className="bg-white rounded-lg shadow-lg p-6">
-            {/* Sound Title with Favorite Button */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">{state.sound.name}</h1>
@@ -151,7 +140,6 @@ export function SoundDetail() {
                   </Link>
                 </p>
               </div>
-              {/* Favorite Button */}
               <FavoriteButton
                 soundId={state.sound.id}
                 isFavorite={isFavorite(state.sound.id)}
@@ -161,7 +149,6 @@ export function SoundDetail() {
               />
             </div>
 
-            {/* Waveform and Audio Player */}
             {state.sound.previews?.['preview-hq-mp3'] && (
               <div className="mb-6">
                 <AudioPlayer
@@ -175,10 +162,8 @@ export function SoundDetail() {
               </div>
             )}
 
-            {/* Sound Details */}
             <SoundMetadata sound={state.sound} />
 
-          {/* Description */}
           {state.sound.description && (
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-2">Description</h2>
@@ -189,7 +174,6 @@ export function SoundDetail() {
             </div>
           )}
 
-            {/* Tags */}
             {state.sound.tags && state.sound.tags.length > 0 && (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">Tags</h2>
@@ -197,7 +181,6 @@ export function SoundDetail() {
               </div>
             )}
 
-            {/* External Link */}
             <div className="mt-6 pt-6 border-t border-gray-200">
               <a
                 href={`https://freesound.org/s/${state.sound.id}/`}

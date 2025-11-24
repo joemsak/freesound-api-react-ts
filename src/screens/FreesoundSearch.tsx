@@ -28,13 +28,11 @@ export function FreesoundSearch() {
   const [currentPage, setCurrentPage] = useState(urlPage);
   const { toggleFavorite, isFavorite } = useFavorites();
   const { getSearchResults, setSearchResults } = useSoundCache();
-  
-  // Use refs for values that shouldn't trigger effect re-runs
+
   const currentPageRef = useRef(currentPage);
   const soundsRef = useRef(sounds);
   const queryRef = useRef(query);
-  
-  // Keep refs in sync
+
   useEffect(() => {
     currentPageRef.current = currentPage;
   }, [currentPage]);
@@ -47,7 +45,6 @@ export function FreesoundSearch() {
     queryRef.current = query;
   }, [query]);
 
-  // Update document title based on search query
   useDocumentTitle(urlQuery ? `Search: ${urlQuery}` : 'Search Results');
 
   const performSearch = useCallback((searchQuery: string, page: number = 1) => {
@@ -56,7 +53,6 @@ export function FreesoundSearch() {
       return;
     }
 
-    // Check cache first
     const cachedResults = getSearchResults(searchQuery, page);
     if (cachedResults) {
       setSounds(cachedResults);
@@ -71,7 +67,7 @@ export function FreesoundSearch() {
 
     const searchCallback = (data: SoundCollection) => {
       setSounds(data);
-      setSearchResults(searchQuery, page, data); // Cache the results
+      setSearchResults(searchQuery, page, data);
       setLoading(false);
       lastSearchRef.current = { query: searchQuery, page };
     };
@@ -83,8 +79,6 @@ export function FreesoundSearch() {
       setLoading(false);
     };
 
-    // Freesound API uses next/previous URLs for pagination, not direct page numbers
-    // Always start from page 1, then navigate if needed
     freesound.textSearch(
       searchQuery,
       {
@@ -92,7 +86,6 @@ export function FreesoundSearch() {
         fields: DEFAULT_SOUND_FIELDS,
       },
       (data: SoundCollection) => {
-        // If we need a page > 1, navigate forward using nextPage
         if (page > 1 && data.next) {
           let currentData = data;
           let currentPageNum = 1;
@@ -109,7 +102,7 @@ export function FreesoundSearch() {
               );
             } else {
               setSounds(currentData);
-              setSearchResults(searchQuery, page, currentData); // Cache the results
+              setSearchResults(searchQuery, page, currentData);
               setCurrentPage(page);
               setLoading(false);
               lastSearchRef.current = { query: searchQuery, page };
@@ -131,10 +124,8 @@ export function FreesoundSearch() {
       setError('Please enter a search query');
       return;
     }
-    
-    // Update URL with new query and reset to page 1
+
     setSearchParams({ q: trimmedQuery, page: '1' });
-    // The useEffect will handle the search when URL changes
   };
 
   // Initialize from URL on mount and sync when URL changes
@@ -148,7 +139,6 @@ export function FreesoundSearch() {
       return;
     }
 
-    // Sync query input with URL
     if (!initializedRef.current) {
       initializedRef.current = true;
       setQuery(urlQuery);
@@ -158,26 +148,21 @@ export function FreesoundSearch() {
       queryRef.current = urlQuery;
     }
 
-    // Check if this is the same search we just did
     const lastSearch = lastSearchRef.current;
     const isSameSearch = lastSearch && lastSearch.query === urlQuery && lastSearch.page === urlPage;
-    
+
     if (isSameSearch) {
-      // Already performed this exact search, skip to avoid duplicate API calls
       return;
     }
 
-    // Check if query or page changed - show loading immediately for instant feedback
     const queryChanged = !lastSearch || lastSearch.query !== urlQuery;
     const pageChanged = !lastSearch || lastSearch.page !== urlPage;
-    
+
     if (queryChanged || pageChanged) {
-      // Show loading state immediately for instant feedback
       setLoading(true);
       setError(null);
-      
+
       if (queryChanged) {
-        // New query - reset ref and always do fresh search
         lastSearchRef.current = null;
         setCurrentPage(urlPage);
         performSearch(urlQuery, urlPage);
@@ -185,14 +170,12 @@ export function FreesoundSearch() {
       }
     }
 
-    // Same query, different page - check if we can navigate from current page
     const pageDiff = urlPage - currentPageRef.current;
     const canNavigateFromCurrent = soundsRef.current && 
                                    Math.abs(pageDiff) <= MAX_NAVIGATION_DISTANCE && 
                                    pageDiff !== 0;
 
     if (canNavigateFromCurrent && soundsRef.current) {
-      // Navigate using nextPage/previousPage for small page differences
       setLoading(true);
       setCurrentPage(urlPage);
       
@@ -217,7 +200,6 @@ export function FreesoundSearch() {
               navigate();
             },
             () => {
-              // Fallback to fresh search on error
               lastSearchRef.current = null;
               performSearch(urlQuery, urlPage);
             }
@@ -230,13 +212,11 @@ export function FreesoundSearch() {
               navigate();
             },
             () => {
-              // Fallback to fresh search on error
               lastSearchRef.current = null;
               performSearch(urlQuery, urlPage);
             }
           );
         } else {
-          // Can't navigate, do fresh search
           lastSearchRef.current = null;
           performSearch(urlQuery, urlPage);
         }
@@ -244,7 +224,6 @@ export function FreesoundSearch() {
 
       navigate();
     } else {
-      // Large page jump or no sounds - do fresh search
       setCurrentPage(urlPage);
       performSearch(urlQuery, urlPage);
     }
@@ -256,14 +235,12 @@ export function FreesoundSearch() {
     const totalPages = sounds ? Math.ceil(sounds.count / PAGE_SIZE) : 1;
     if (page > totalPages) return;
 
-    // Update URL - the useEffect will handle the search
     setSearchParams({ q: urlQuery, page: page.toString() });
   };
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        {/* Search Input - only show if no query */}
         {!urlQuery && (
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Search Sounds</h2>
@@ -276,10 +253,8 @@ export function FreesoundSearch() {
           </div>
         )}
 
-        {/* Error Message */}
         {error && <ErrorMessage message={error} />}
 
-        {/* Loading Skeleton */}
         {loading && !sounds && (
           <div>
             {urlQuery && (
@@ -292,7 +267,6 @@ export function FreesoundSearch() {
           </div>
         )}
 
-        {/* Results */}
         {sounds && !loading && (
           <div>
             <SearchResultsHeader
@@ -315,7 +289,6 @@ export function FreesoundSearch() {
           </div>
         )}
 
-        {/* Empty State */}
         {!sounds && !loading && !error && (
           <EmptyState message="Enter a search query to find sounds on Freesound" />
         )}

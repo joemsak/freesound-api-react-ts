@@ -11,7 +11,6 @@ export function useAsyncEffect(
   const cancelledRef = useRef(false);
   const effectRef = useRef(effect);
 
-  // Keep effect ref up to date
   useEffect(() => {
     effectRef.current = effect;
   }, [effect]);
@@ -27,7 +26,6 @@ export function useAsyncEffect(
         cleanup();
       }
     };
-    // deps is intentionally dynamic - this hook allows custom dependency arrays
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }

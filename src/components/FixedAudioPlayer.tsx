@@ -9,14 +9,12 @@ export function FixedAudioPlayer() {
   const { toggleFavorite, isFavorite } = useFavorites();
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Sync the fixed player audio element with the current track's audio element
   useEffect(() => {
     if (!currentTrack || !audioRef.current) return;
 
     const fixedAudio = audioRef.current;
     const sourceAudio = currentTrack.audioElement;
 
-    // Sync playback state
     const syncPlayback = () => {
       if (sourceAudio.paused) {
         fixedAudio.pause();
@@ -27,23 +25,19 @@ export function FixedAudioPlayer() {
       }
     };
 
-    // Sync time
     const syncTime = () => {
       if (Math.abs(fixedAudio.currentTime - sourceAudio.currentTime) > 0.5) {
         fixedAudio.currentTime = sourceAudio.currentTime;
       }
     };
 
-    // Listen to source audio events
     sourceAudio.addEventListener('play', syncPlayback);
     sourceAudio.addEventListener('pause', syncPlayback);
     sourceAudio.addEventListener('timeupdate', syncTime);
 
-    // Initial sync
     syncPlayback();
     syncTime();
 
-    // Handle fixed player interactions
     const handleFixedPlay = () => {
       if (sourceAudio.paused) {
         sourceAudio.play();
@@ -82,7 +76,6 @@ export function FixedAudioPlayer() {
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center gap-4">
-          {/* Track Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3">
               {currentTrack.waveformUrl && (
@@ -113,7 +106,6 @@ export function FixedAudioPlayer() {
             </div>
           </div>
 
-          {/* Audio Controls */}
           <div className="flex items-center gap-2">
             {currentTrack.soundId && (
               <FavoriteButton

@@ -63,14 +63,12 @@ export function useCachedSearch({
   const { getSearchResults, setSearchResults, setSound } = useSoundCache();
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
-  
-  // Keep refs up to date
+
   useEffect(() => {
     onSuccessRef.current = onSuccess;
     onErrorRef.current = onError;
   }, [onSuccess, onError]);
-  
-  // Initialize state from cache using lazy initializer
+
   const [state, dispatch] = useReducer(reducer, null, () => {
     const cached = getSearchResults(cacheKey, page);
     return {
@@ -81,18 +79,15 @@ export function useCachedSearch({
   });
 
   useEffect(() => {
-    // Check if cache changed
     const cached = getSearchResults(cacheKey, page);
-    
-    // If we have cached data and it matches what we have, we're done
+
     if (cached && cached === state.data) {
       if (onSuccessRef.current) {
         onSuccessRef.current(cached);
       }
       return;
     }
-    
-    // If cache exists but doesn't match current data, update it
+
     if (cached) {
       dispatch({ type: 'SET_CACHED_DATA', payload: cached });
       if (onSuccessRef.current) {
@@ -101,17 +96,13 @@ export function useCachedSearch({
       return;
     }
 
-    // Not in cache, make API call
     dispatch({ type: 'SET_LOADING', payload: true });
 
     searchFn(
       (apiData: SoundCollection) => {
         dispatch({ type: 'SET_API_DATA', payload: apiData });
         setSearchResults(cacheKey, page, apiData);
-        
-        // Cache individual sounds
-        // Note: Search results return SoundData, but we cast to SoundObject for caching
-        // The cache only stores data properties, not methods
+
         apiData.results.forEach((sound) => {
           setSound(sound as SoundObject);
         });
