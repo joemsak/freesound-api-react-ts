@@ -38,8 +38,6 @@ describe('usePaginatedSearch Hook', () => {
       })
     )
 
-    // Cache lookup happens in useEffect, which runs after render
-    // Wait for loading to become false when cache is found
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
     }, { timeout: 500 })
@@ -49,7 +47,6 @@ describe('usePaginatedSearch Hook', () => {
 
   it('calls searchFn when not cached', async () => {
     const searchFn = vi.fn((success: (data: { results: unknown[]; count: number; next: string | null; previous: string | null }) => void) => {
-      // Call success synchronously
       success({ results: [], count: 0, next: null, previous: null })
     })
 
@@ -62,7 +59,6 @@ describe('usePaginatedSearch Hook', () => {
       })
     )
 
-    // searchFn is called in useEffect, which runs after render
     await waitFor(() => {
       expect(searchFn).toHaveBeenCalled()
     }, { timeout: 500 })

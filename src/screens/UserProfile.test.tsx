@@ -24,7 +24,7 @@ vi.mock('../contexts/SoundCacheContext', async () => {
     useSoundCache: () => ({
       getSound: vi.fn(() => undefined),
       setSound: vi.fn(),
-      getSearchResults: vi.fn(() => undefined), // Return undefined to force API call
+      getSearchResults: vi.fn(() => undefined),
       setSearchResults: vi.fn(),
     }),
   }
@@ -33,7 +33,6 @@ vi.mock('../contexts/SoundCacheContext', async () => {
 vi.mock('../services/freesound', () => ({
   freesound: {
     textSearch: vi.fn((query, options, success) => {
-      // Call success immediately
       success({
         results: [],
         count: 0,
@@ -66,9 +65,7 @@ describe('UserProfile Component', () => {
 
   it('renders user profile with username', async () => {
     renderWithRouter('/user/testuser')
-    // Wait for component to render - username appears in empty message when no results
     await waitFor(() => {
-      // Username appears in the empty state message
       expect(screen.getByText(/no sounds found for testuser/i)).toBeInTheDocument()
     }, { timeout: 1000 })
   })

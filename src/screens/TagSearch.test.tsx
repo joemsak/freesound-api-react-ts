@@ -24,7 +24,7 @@ vi.mock('../contexts/SoundCacheContext', async () => {
     useSoundCache: () => ({
       getSound: vi.fn(() => undefined),
       setSound: vi.fn(),
-      getSearchResults: vi.fn(() => undefined), // Return undefined to force API call
+      getSearchResults: vi.fn(() => undefined),
       setSearchResults: vi.fn(),
     }),
   }
@@ -33,7 +33,6 @@ vi.mock('../contexts/SoundCacheContext', async () => {
 vi.mock('../services/freesound', () => ({
   freesound: {
     textSearch: vi.fn((query, options, success) => {
-      // Call success immediately
       success({
         results: [],
         count: 0,
@@ -66,9 +65,7 @@ describe('TagSearch Component', () => {
 
   it('renders tag search with tag name', async () => {
     renderWithRouter('/tag/music')
-    // Wait for component to render - tag name appears in empty message when no results
     await waitFor(() => {
-      // Tag name appears in the empty state message
       expect(screen.getByText(/no sounds found for tag "music"/i)).toBeInTheDocument()
     }, { timeout: 1000 })
   })

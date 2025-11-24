@@ -23,7 +23,7 @@ vi.mock('../contexts/SoundCacheContext', async () => {
     useSoundCache: () => ({
       getSound: vi.fn(() => undefined),
       setSound: vi.fn(),
-      getSearchResults: vi.fn(() => undefined), // Return undefined to force API call
+      getSearchResults: vi.fn(() => undefined),
       setSearchResults: vi.fn(),
     }),
   }
@@ -32,7 +32,6 @@ vi.mock('../contexts/SoundCacheContext', async () => {
 vi.mock('../services/freesound', () => ({
   freesound: {
     textSearch: vi.fn((query, options, success) => {
-      // Call success immediately, don't use setTimeout
       success({
         results: [],
         count: 0,
@@ -55,15 +54,11 @@ describe('FreesoundSearch Component', () => {
 
   it('renders search input when query is provided', async () => {
     render(<FreesoundSearch />, { initialEntries: ['/search?q=test'] })
-    // When query is provided, SearchInput is hidden but results header should appear
-    // Wait for API call to complete
     await waitFor(() => {
-      // Either results header or empty state should appear
       const hasResults = screen.queryByText(/showing/i) !== null
       const hasEmpty = screen.queryByText(/no sounds found/i) !== null
       expect(hasResults || hasEmpty).toBe(true)
     }, { timeout: 1000 })
-    // SearchInput is hidden when query exists, so verify query appears in results
     expect(screen.getByText(/test/i)).toBeInTheDocument()
   })
 

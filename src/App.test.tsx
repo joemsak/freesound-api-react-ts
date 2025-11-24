@@ -5,7 +5,6 @@ import * as FavoritesContext from './contexts/FavoritesContext'
 import * as SoundCacheContext from './contexts/SoundCacheContext'
 import * as AudioPlayerContext from './contexts/AudioPlayerContext'
 
-// Mock the contexts to avoid API calls
 vi.mock('./contexts/FavoritesContext', async () => {
   const actual = await vi.importActual<typeof FavoritesContext>('./contexts/FavoritesContext')
   return {
@@ -71,35 +70,30 @@ describe('App Routing Integration Tests', () => {
   it('renders Home component on root path', () => {
     render(<App />, { initialEntries: ['/'] })
 
-    // Mocked components render immediately
     expect(screen.getByTestId('home-screen')).toBeInTheDocument()
   })
 
   it('renders Search component on /search path', () => {
     render(<App />, { initialEntries: ['/search?q=test'] })
 
-    // Mocked components render immediately
     expect(screen.getByTestId('search-screen')).toBeInTheDocument()
   })
 
   it('renders SoundDetail component on /sound/:soundId path', () => {
     render(<App />, { initialEntries: ['/sound/123'] })
 
-    // Mocked components render immediately
     expect(screen.getByTestId('sound-detail-screen')).toBeInTheDocument()
   })
 
   it('renders UserProfile component on /user/:username path', () => {
     render(<App />, { initialEntries: ['/user/testuser'] })
 
-    // Mocked components render immediately
     expect(screen.getByTestId('user-profile-screen')).toBeInTheDocument()
   })
 
   it('renders TagSearch component on /tag/:tagName path', () => {
     render(<App />, { initialEntries: ['/tag/music'] })
 
-    // Mocked components render immediately
     expect(screen.getByTestId('tag-search-screen')).toBeInTheDocument()
   })
 
@@ -108,7 +102,6 @@ describe('App Routing Integration Tests', () => {
 
     expect(screen.getByTestId('home-screen')).toBeInTheDocument()
 
-    // Navigate to search - render with new route
     const { unmount } = render(<App />, { initialEntries: ['/search'] })
     expect(screen.getByTestId('search-screen')).toBeInTheDocument()
     unmount()

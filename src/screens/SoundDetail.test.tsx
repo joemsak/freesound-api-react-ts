@@ -82,10 +82,8 @@ describe('SoundDetail Component', () => {
   }
 
   it('renders loading state initially', () => {
-    // Use a sound ID that's not in cache to see loading state
     const { container } = renderWithRouter('/sound/999')
 
-    // Should show loading skeleton - ScreenLayout shows SoundDetailSkeleton when loading
     const skeleton = container.querySelector('.animate-pulse')
     expect(skeleton).toBeInTheDocument()
   })
@@ -93,7 +91,6 @@ describe('SoundDetail Component', () => {
   it('displays sound from cache', () => {
     renderWithRouter('/sound/123')
 
-    // Cache lookup is synchronous, so no need for waitFor
     expect(screen.getByText('Test Sound')).toBeInTheDocument()
     expect(screen.getByText(/testuser/i)).toBeInTheDocument()
   })
@@ -101,7 +98,6 @@ describe('SoundDetail Component', () => {
   it('loads sound from API when not in cache', async () => {
     renderWithRouter('/sound/456')
 
-    // API call is synchronous in mock, but React state update is async
     await waitFor(() => {
       expect(screen.getByText('API Sound')).toBeInTheDocument()
     }, { timeout: 1000 })
@@ -110,7 +106,6 @@ describe('SoundDetail Component', () => {
   it('shows error for invalid sound ID', () => {
     renderWithRouter('/sound/invalid')
 
-    // Error state is set synchronously in useEffect
     expect(screen.getByText('Invalid sound ID')).toBeInTheDocument()
   })
 })
