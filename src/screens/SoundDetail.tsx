@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { freesound, type SoundObject } from '../services/freesound';
 import { useFavorites } from '../contexts/FavoritesContext';
@@ -14,7 +14,6 @@ import { ScreenLayout } from '../components/ScreenLayout';
 
 export function SoundDetail() {
   const { soundId } = useParams<{ soundId: string }>();
-  const location = useLocation();
   const { getSound, setSound: cacheSound } = useSoundCache();
   const { toggleFavorite, isFavorite } = useFavorites();
   const cancelledRef = useRef(false);
@@ -90,7 +89,7 @@ export function SoundDetail() {
     return () => {
       cancelledRef.current = true;
     };
-  }, [soundId, location.key, getSound, cacheSound]);
+  }, [soundId, getSound, cacheSound]);
 
   return (
     <ScreenLayout
