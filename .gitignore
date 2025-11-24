@@ -33,3 +33,7 @@ node_modules
 .cursorindexingignore
 .specstory/
 .env
+
+# Test coverage
+coverage/
+*.lcov
