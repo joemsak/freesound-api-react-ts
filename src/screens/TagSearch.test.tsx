@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '../test/test-utils'
+import { render, screen, waitFor } from '../test/test-utils'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { TagSearch } from './TagSearch'
 import * as FavoritesContext from '../contexts/FavoritesContext'
 import * as SoundCacheContext from '../contexts/SoundCacheContext'
@@ -48,16 +49,30 @@ describe('TagSearch Component', () => {
     vi.clearAllMocks()
   })
 
+  const renderWithRouter = (path: string) => {
+    return render(
+      <Routes>
+        <Route path="/tag/:tagName" element={<TagSearch />} />
+        <Route path="/tag/" element={<TagSearch />} />
+      </Routes>,
+      { initialEntries: [path] }
+    )
+  }
+
   it('renders error message when tagName is missing', () => {
-    render(<TagSearch />, { initialEntries: ['/tag/'] })
+    renderWithRouter('/tag/')
     expect(screen.getByText(/invalid tag name/i)).toBeInTheDocument()
   })
 
-  it('renders tag search with tag name', () => {
-    render(<TagSearch />, { initialEntries: ['/tag/music'] })
-    // Tag name appears in the header - wait for it to render
+  it('renders tag search with tag name', async () => {
+    renderWithRouter('/tag/music')
+    // Wait for component to render - tag name should appear in header
+    await waitFor(() => {
+      // Tag name appears in the header
+      expect(screen.getByText('music')).toBeInTheDocument()
+    }, { timeout: 1000 })
+    // Verify tag header is rendered
     expect(screen.getByText(/tag:/i)).toBeInTheDocument()
-    expect(screen.getByText('music')).toBeInTheDocument()
   })
 })
 
