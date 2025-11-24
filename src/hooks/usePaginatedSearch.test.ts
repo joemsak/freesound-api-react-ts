@@ -26,7 +26,7 @@ describe('usePaginatedSearch Hook', () => {
     vi.clearAllMocks()
   })
 
-  it('returns cached results immediately', () => {
+  it('returns cached results immediately', async () => {
     const searchFn = vi.fn()
 
     const { result } = renderHook(() =>
@@ -38,9 +38,12 @@ describe('usePaginatedSearch Hook', () => {
       })
     )
 
-    // Cache lookup happens synchronously in useEffect
-    // But state updates are async, so we need to wait a bit
-    expect(result.current.loading).toBe(true) // Initially loading
+    // Cache lookup happens in useEffect, which runs after render
+    // Wait for loading to become false when cache is found
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    }, { timeout: 500 })
+    expect(result.current.sounds).not.toBeNull()
     expect(searchFn).not.toHaveBeenCalled()
   })
 
