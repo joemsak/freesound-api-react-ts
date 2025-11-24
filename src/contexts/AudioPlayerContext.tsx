@@ -72,6 +72,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAudioPlayer() {
   const context = useContext(AudioPlayerContext);
   if (context === undefined) {

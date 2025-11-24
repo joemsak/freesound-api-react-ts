@@ -287,6 +287,7 @@ export function SoundCacheProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSoundCache() {
   const context = useContext(SoundCacheContext);
   if (context === undefined) {
