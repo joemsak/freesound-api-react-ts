@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { SearchInput } from './SearchInput';
@@ -17,16 +17,9 @@ export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps
   // React Router with basename automatically strips the basename from pathname
   const isHomePage = location.pathname === '/';
   const urlQuery = searchParams.get('q') || '';
-  const [query, setQuery] = useState(urlQuery);
-
-  // Sync query with URL when on search page
-  useEffect(() => {
-    if (location.pathname === '/search') {
-      setQuery(urlQuery);
-    } else {
-      setQuery('');
-    }
-  }, [location.pathname, urlQuery]);
+  // Derive query from URL - only use local state for user input before search
+  const [localQuery, setLocalQuery] = useState('');
+  const query = location.pathname === '/search' ? urlQuery : localQuery;
 
   const handleSearch = () => {
     const trimmedQuery = query.trim();
@@ -65,7 +58,7 @@ export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps
           <div className="flex-1 max-w-2xl flex items-center">
             <SearchInput
               query={query}
-              onQueryChange={setQuery}
+              onQueryChange={setLocalQuery}
               onSearch={handleSearch}
               loading={false}
             />
