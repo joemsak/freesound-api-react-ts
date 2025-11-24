@@ -30,7 +30,7 @@ export function usePaginatedSearch({
   
   // Initialize state from cache using lazy initializer
   const [sounds, setSounds] = useState<SoundCollection | null>(() => {
-    return getSearchResults(cacheKey, page);
+    return getSearchResults(cacheKey, page) || null;
   });
   const [loading, setLoading] = useState(() => !getSearchResults(cacheKey, page));
   const [error, setError] = useState<string | null>(null);
