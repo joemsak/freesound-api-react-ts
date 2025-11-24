@@ -74,7 +74,7 @@ export function useCachedSearch({
   const [state, dispatch] = useReducer(reducer, null, () => {
     const cached = getSearchResults(cacheKey, page);
     return {
-      data: cached,
+      data: cached || null,
       loading: !cached,
       error: null,
     };
