@@ -47,7 +47,7 @@ export function SoundDetail() {
   const { getSound, setSound: cacheSound } = useSoundCache();
   const { toggleFavorite, isFavorite } = useFavorites();
   const cancelledRef = useRef(false);
-  const previousSoundIdRef = useRef<string | undefined>(soundId);
+  const previousSoundIdRef = useRef<string | undefined>(undefined);
   
   // Initialize state from cache using lazy initializer
   const [state, dispatch] = useReducer(soundDetailReducer, null, () => {
