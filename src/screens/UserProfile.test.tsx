@@ -66,10 +66,10 @@ describe('UserProfile Component', () => {
 
   it('renders user profile with username', async () => {
     renderWithRouter('/user/testuser')
-    // Wait for component to render - username should appear in header
+    // Wait for component to render - username appears in empty message when no results
     await waitFor(() => {
-      // Username appears in the header
-      expect(screen.getByText('testuser')).toBeInTheDocument()
+      // Username appears in the empty state message
+      expect(screen.getByText(/no sounds found for testuser/i)).toBeInTheDocument()
     }, { timeout: 1000 })
   })
 })

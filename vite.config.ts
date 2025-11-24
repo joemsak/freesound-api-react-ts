@@ -15,9 +15,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: true,
-    pool: 'threads',
+    pool: 'vmThreads',
     poolOptions: {
-      threads: {
+      vmThreads: {
         singleThread: true,
         isolate: false,
       },

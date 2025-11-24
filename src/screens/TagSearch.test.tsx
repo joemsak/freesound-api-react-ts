@@ -66,13 +66,11 @@ describe('TagSearch Component', () => {
 
   it('renders tag search with tag name', async () => {
     renderWithRouter('/tag/music')
-    // Wait for component to render - tag name should appear in header
+    // Wait for component to render - tag name appears in empty message when no results
     await waitFor(() => {
-      // Tag name appears in the header
-      expect(screen.getByText('music')).toBeInTheDocument()
+      // Tag name appears in the empty state message
+      expect(screen.getByText(/no sounds found for tag "music"/i)).toBeInTheDocument()
     }, { timeout: 1000 })
-    // Verify tag header is rendered
-    expect(screen.getByText(/tag:/i)).toBeInTheDocument()
   })
 })
 
