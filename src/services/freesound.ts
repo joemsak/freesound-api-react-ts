@@ -1,5 +1,7 @@
 // Freesound API Client - TypeScript version
 // Integrated with environment variables
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// External API callbacks use any for flexibility with API responses
 import { rateLimiter } from '../utils/rateLimiter';
 
 interface SearchOptions {
