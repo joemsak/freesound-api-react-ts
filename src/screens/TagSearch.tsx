@@ -1,5 +1,6 @@
 import { useParams, useSearchParams } from 'react-router-dom';
-import { freesound } from '../services/freesound';
+import { useCallback } from 'react';
+import { freesound, type SoundCollection } from '../services/freesound';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePaginatedSearch } from '../hooks/usePaginatedSearch';
 import { SearchResults } from '../components/SearchResults';
@@ -18,24 +19,26 @@ export function TagSearch() {
   // Update document title
   useDocumentTitle(tagName ? `Tag: ${tagName}` : 'Tag Search');
 
+  const searchFn = useCallback((success: (data: SoundCollection) => void, errorCallback: (err: unknown) => void) => {
+    if (!tagName) {
+      errorCallback(new Error('Invalid tag name'));
+      return;
+    }
+    freesound.textSearch(
+      '',
+      {
+        filter: `tag:${tagName}`,
+        page_size: PAGE_SIZE,
+        fields: DEFAULT_SOUND_FIELDS,
+      },
+      success,
+      errorCallback
+    );
+  }, [tagName]);
+
   const { sounds, loading, error, currentPage } = usePaginatedSearch({
     cacheKey: tagName ? `tag:${tagName}` : '',
-    searchFn: (success, errorCallback) => {
-      if (!tagName) {
-        errorCallback(new Error('Invalid tag name'));
-        return;
-      }
-      freesound.textSearch(
-        '',
-        {
-          filter: `tag:${tagName}`,
-          page_size: PAGE_SIZE,
-          fields: DEFAULT_SOUND_FIELDS,
-        },
-        success,
-        errorCallback
-      );
-    },
+    searchFn,
     defaultErrorMessage: 'Failed to load tag sounds.',
     page: urlPage,
   });
@@ -65,7 +68,6 @@ export function TagSearch() {
       loading={loading}
       error={error}
       hasData={!!sounds && sounds.results.length > 0}
-      loadingMessage="Loading tag sounds..."
       emptyMessage={`No sounds found for tag "${tagName}"`}
     >
       <div className="w-full max-w-4xl mx-auto p-6">

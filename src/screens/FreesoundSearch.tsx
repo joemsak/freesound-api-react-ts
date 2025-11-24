@@ -147,15 +147,22 @@ export function FreesoundSearch() {
       return;
     }
 
-    // Check if query changed (new search) - if so, always do fresh search
+    // Check if query or page changed - show loading immediately for instant feedback
     const queryChanged = !lastSearch || lastSearch.query !== urlQuery;
+    const pageChanged = !lastSearch || lastSearch.page !== urlPage;
     
-    if (queryChanged) {
-      // New query - reset ref and always do fresh search
-      lastSearchRef.current = null;
-      setCurrentPage(urlPage);
-      performSearch(urlQuery, urlPage);
-      return;
+    if (queryChanged || pageChanged) {
+      // Show loading state immediately for instant feedback
+      setLoading(true);
+      setError(null);
+      
+      if (queryChanged) {
+        // New query - reset ref and always do fresh search
+        lastSearchRef.current = null;
+        setCurrentPage(urlPage);
+        performSearch(urlQuery, urlPage);
+        return;
+      }
     }
 
     // Same query, different page - check if we can navigate from current page

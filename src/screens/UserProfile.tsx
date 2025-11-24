@@ -1,5 +1,6 @@
 import { useParams, useSearchParams } from 'react-router-dom';
-import { freesound } from '../services/freesound';
+import { useCallback } from 'react';
+import { freesound, type SoundCollection } from '../services/freesound';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePaginatedSearch } from '../hooks/usePaginatedSearch';
 import { SearchResults } from '../components/SearchResults';
@@ -18,24 +19,26 @@ export function UserProfile() {
   // Update document title
   useDocumentTitle(username ? `User: ${username}` : 'User Profile');
 
+  const searchFn = useCallback((success: (data: SoundCollection) => void, errorCallback: (err: unknown) => void) => {
+    if (!username) {
+      errorCallback(new Error('Invalid username'));
+      return;
+    }
+    freesound.textSearch(
+      '',
+      {
+        filter: `username:${username}`,
+        page_size: PAGE_SIZE,
+        fields: DEFAULT_SOUND_FIELDS,
+      },
+      success,
+      errorCallback
+    );
+  }, [username]);
+
   const { sounds, loading, error, currentPage } = usePaginatedSearch({
     cacheKey: username ? `user:${username}` : '',
-    searchFn: (success, errorCallback) => {
-      if (!username) {
-        errorCallback(new Error('Invalid username'));
-        return;
-      }
-      freesound.textSearch(
-        '',
-        {
-          filter: `username:${username}`,
-          page_size: PAGE_SIZE,
-          fields: DEFAULT_SOUND_FIELDS,
-        },
-        success,
-        errorCallback
-      );
-    },
+    searchFn,
     defaultErrorMessage: 'Failed to load user sounds.',
     page: urlPage,
   });
@@ -65,7 +68,6 @@ export function UserProfile() {
       loading={loading}
       error={error}
       hasData={!!sounds && sounds.results.length > 0}
-      loadingMessage="Loading user profile..."
       emptyMessage={`No sounds found for ${username}`}
     >
       <div className="w-full max-w-4xl mx-auto p-6">

@@ -11,11 +11,11 @@ import { FixedAudioPlayer } from './components/FixedAudioPlayer';
 
 function AppRoutes() {
   const location = useLocation();
-  
+  // Force Routes to update when location changes
   return (
-    <Routes>
+    <Routes location={location} key={location.pathname}>
       <Route path="/" element={<Home />} />
-      <Route path="/search" element={<FreesoundSearch key={location.pathname + location.search} />} />
+      <Route path="/search" element={<FreesoundSearch />} />
       <Route path="/sound/:soundId" element={<SoundDetail />} />
       <Route path="/user/:username" element={<UserProfile />} />
       <Route path="/tag/:tagName" element={<TagSearch />} />

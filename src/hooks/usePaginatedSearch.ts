@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { type SoundCollection } from '../services/freesound';
 import { useSoundCache } from '../contexts/SoundCacheContext';
 import { extractErrorMessage } from '../utils/errorHandler';
@@ -31,6 +31,14 @@ export function usePaginatedSearch({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(page);
+  const searchFnRef = useRef(searchFn);
+  const defaultErrorMessageRef = useRef(defaultErrorMessage);
+
+  // Keep refs up to date
+  useEffect(() => {
+    searchFnRef.current = searchFn;
+    defaultErrorMessageRef.current = defaultErrorMessage;
+  }, [searchFn, defaultErrorMessage]);
 
   const navigateToPage = useCallback(
     (data: SoundCollection, targetPage: number) => {
@@ -47,7 +55,7 @@ export function usePaginatedSearch({
                 navigateForward();
               },
               (err: unknown) => {
-                const errorMessage = extractErrorMessage(err, defaultErrorMessage);
+                const errorMessage = extractErrorMessage(err, defaultErrorMessageRef.current);
                 setError(errorMessage);
                 console.error('Freesound API Error:', err);
                 setLoading(false);
@@ -69,10 +77,13 @@ export function usePaginatedSearch({
         setLoading(false);
       }
     },
-    [cacheKey, defaultErrorMessage, setSearchResults]
+    [cacheKey, setSearchResults]
   );
 
   useEffect(() => {
+    // Set loading immediately for instant feedback
+    setLoading(true);
+    setError(null);
     setCurrentPage(page);
 
     // Check cache first
@@ -83,21 +94,18 @@ export function usePaginatedSearch({
       return;
     }
 
-    setLoading(true);
-    setError(null);
-
-    searchFn(
+    searchFnRef.current(
       (data: SoundCollection) => {
         navigateToPage(data, page);
       },
       (err: unknown) => {
-        const errorMessage = extractErrorMessage(err, defaultErrorMessage);
+        const errorMessage = extractErrorMessage(err, defaultErrorMessageRef.current);
         setError(errorMessage);
         console.error('Freesound API Error:', err);
         setLoading(false);
       }
     );
-  }, [cacheKey, page, getSearchResults, searchFn, navigateToPage, defaultErrorMessage]);
+  }, [cacheKey, page, getSearchResults, navigateToPage]);
 
   return {
     sounds,
