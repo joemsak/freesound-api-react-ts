@@ -5,7 +5,7 @@ import { useFavorites } from '../contexts/FavoritesContext';
 import { FavoriteButton } from './FavoriteButton';
 
 export function FixedAudioPlayer() {
-  const { currentTrack, pauseCurrent } = useAudioPlayer();
+  const { currentTrack } = useAudioPlayer();
   const { toggleFavorite, isFavorite } = useFavorites();
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -124,19 +124,6 @@ export function FixedAudioPlayer() {
                 className="flex-shrink-0"
               />
             )}
-            <button
-              onClick={pauseCurrent}
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-              title="Pause"
-            >
-              <svg
-                className="w-5 h-5 text-gray-700"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-              </svg>
-            </button>
             <div className="w-64 sm:w-96">
               <audio
                 ref={audioRef}
