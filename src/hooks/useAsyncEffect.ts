@@ -9,11 +9,17 @@ export function useAsyncEffect(
   deps: React.DependencyList
 ): void {
   const cancelledRef = useRef(false);
+  const effectRef = useRef(effect);
+
+  // Keep effect ref up to date
+  useEffect(() => {
+    effectRef.current = effect;
+  }, [effect]);
 
   useEffect(() => {
     cancelledRef.current = false;
 
-    const cleanup = effect();
+    const cleanup = effectRef.current();
 
     return () => {
       cancelledRef.current = true;
@@ -21,6 +27,7 @@ export function useAsyncEffect(
         cleanup();
       }
     };
+    // deps is intentionally dynamic - this hook allows custom dependency arrays
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }
