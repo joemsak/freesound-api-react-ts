@@ -87,7 +87,6 @@ export function usePaginatedSearch({
   );
 
   useEffect(() => {
-    // Skip if cacheKey and page haven't changed
     if (previousCacheKeyRef.current === cacheKey && previousPageRef.current === page) {
       return;
     }
