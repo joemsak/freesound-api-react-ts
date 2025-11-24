@@ -9,17 +9,20 @@ export default defineConfig({
   // For GitHub Pages: use repo name as base path
   // For custom domain or other hosting: set base to '/'
   base: process.env.NODE_ENV === 'production' ? '/freesound-api-react-ts/' : '/',
+  optimizeDeps: {
+    include: ['react-router', 'react-router-dom'],
+  },
   // @ts-expect-error - Vitest config properties are not in Vite types
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: true,
-    pool: 'vmThreads',
+    pool: 'forks',
     poolOptions: {
-      vmThreads: {
-        singleThread: true,
-        isolate: false,
+      forks: {
+        singleFork: true,
+        isolate: true,
       },
     },
     testTimeout: 10000,
