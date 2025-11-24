@@ -125,14 +125,14 @@ describe('usePaginatedSearch Hook', () => {
 
     await waitFor(() => {
       expect(searchFn).toHaveBeenCalledTimes(1)
-    })
+    }, { timeout: 500 })
 
     rerender({ page: 2 })
 
     await waitFor(() => {
       expect(searchFn).toHaveBeenCalledTimes(2)
       expect(result.current.currentPage).toBe(2)
-    })
+    }, { timeout: 500 })
   })
 })
 

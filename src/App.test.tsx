@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from './test/test-utils'
+import { render, screen } from './test/test-utils'
 import App from './App'
 import * as FavoritesContext from './contexts/FavoritesContext'
 import * as SoundCacheContext from './contexts/SoundCacheContext'
@@ -68,58 +68,50 @@ describe('App Routing Integration Tests', () => {
     vi.clearAllMocks()
   })
 
-  it('renders Home component on root path', async () => {
+  it('renders Home component on root path', () => {
     render(<App />, { initialEntries: ['/'] })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('home-screen')).toBeInTheDocument()
-    })
+    // Mocked components render immediately
+    expect(screen.getByTestId('home-screen')).toBeInTheDocument()
   })
 
-  it('renders Search component on /search path', async () => {
+  it('renders Search component on /search path', () => {
     render(<App />, { initialEntries: ['/search?q=test'] })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('search-screen')).toBeInTheDocument()
-    })
+    // Mocked components render immediately
+    expect(screen.getByTestId('search-screen')).toBeInTheDocument()
   })
 
-  it('renders SoundDetail component on /sound/:soundId path', async () => {
+  it('renders SoundDetail component on /sound/:soundId path', () => {
     render(<App />, { initialEntries: ['/sound/123'] })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('sound-detail-screen')).toBeInTheDocument()
-    })
+    // Mocked components render immediately
+    expect(screen.getByTestId('sound-detail-screen')).toBeInTheDocument()
   })
 
-  it('renders UserProfile component on /user/:username path', async () => {
+  it('renders UserProfile component on /user/:username path', () => {
     render(<App />, { initialEntries: ['/user/testuser'] })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('user-profile-screen')).toBeInTheDocument()
-    })
+    // Mocked components render immediately
+    expect(screen.getByTestId('user-profile-screen')).toBeInTheDocument()
   })
 
-  it('renders TagSearch component on /tag/:tagName path', async () => {
+  it('renders TagSearch component on /tag/:tagName path', () => {
     render(<App />, { initialEntries: ['/tag/music'] })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('tag-search-screen')).toBeInTheDocument()
-    })
+    // Mocked components render immediately
+    expect(screen.getByTestId('tag-search-screen')).toBeInTheDocument()
   })
 
-  it('updates route when navigating between pages', async () => {
-    const { rerender } = render(<App />, { initialEntries: ['/'] })
+  it('updates route when navigating between pages', () => {
+    render(<App />, { initialEntries: ['/'] })
 
     expect(screen.getByTestId('home-screen')).toBeInTheDocument()
 
-    // Navigate to search
-    rerender(<App />)
-    render(<App />, { initialEntries: ['/search'] })
-
-    await waitFor(() => {
-      expect(screen.getByTestId('search-screen')).toBeInTheDocument()
-    })
+    // Navigate to search - render with new route
+    const { unmount } = render(<App />, { initialEntries: ['/search'] })
+    expect(screen.getByTestId('search-screen')).toBeInTheDocument()
+    unmount()
   })
 })
 
