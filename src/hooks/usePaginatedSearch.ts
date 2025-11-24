@@ -27,12 +27,18 @@ export function usePaginatedSearch({
   page,
 }: UsePaginatedSearchOptions): UsePaginatedSearchResult {
   const { getSearchResults, setSearchResults } = useSoundCache();
-  const [sounds, setSounds] = useState<SoundCollection | null>(null);
-  const [loading, setLoading] = useState(false);
+  
+  // Initialize state from cache using lazy initializer
+  const [sounds, setSounds] = useState<SoundCollection | null>(() => {
+    return getSearchResults(cacheKey, page);
+  });
+  const [loading, setLoading] = useState(() => !getSearchResults(cacheKey, page));
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(page);
   const searchFnRef = useRef(searchFn);
   const defaultErrorMessageRef = useRef(defaultErrorMessage);
+  const previousCacheKeyRef = useRef(cacheKey);
+  const previousPageRef = useRef(page);
 
   // Keep refs up to date
   useEffect(() => {
@@ -81,10 +87,15 @@ export function usePaginatedSearch({
   );
 
   useEffect(() => {
-    // Set loading immediately for instant feedback
-    setLoading(true);
-    setError(null);
+    // Skip if cacheKey and page haven't changed
+    if (previousCacheKeyRef.current === cacheKey && previousPageRef.current === page) {
+      return;
+    }
+    previousCacheKeyRef.current = cacheKey;
+    previousPageRef.current = page;
+    
     setCurrentPage(page);
+    setError(null);
 
     // Check cache first
     const cachedResults = getSearchResults(cacheKey, page);
@@ -93,6 +104,9 @@ export function usePaginatedSearch({
       setLoading(false);
       return;
     }
+    
+    // Not in cache, need to fetch
+    setLoading(true);
 
     searchFnRef.current(
       (data: SoundCollection) => {
