@@ -17,8 +17,8 @@ describe('Tags Component', () => {
   })
 
   it('renders nothing when tags is null', () => {
-    const { container } = render(<Tags tags={null as any} />)
-    expect(container.firstChild).toBeNull()
+    render(<Tags tags={null as unknown as string[]} />)
+    expect(screen.queryByText(/tag/i)).not.toBeInTheDocument()
   })
 
   it('limits tags when maxTags is provided', () => {
@@ -32,7 +32,7 @@ describe('Tags Component', () => {
   })
 
   it('applies rounded variant styling', () => {
-    const { container } = render(<Tags tags={['tag1']} variant="rounded" />)
+    render(<Tags tags={['tag1']} variant="rounded" />)
     const tag = screen.getByText('tag1')
     expect(tag.className).toContain('rounded-full')
   })

@@ -47,11 +47,11 @@ describe('usePaginatedSearch Hook', () => {
   })
 
   it('calls searchFn when not cached', async () => {
-    const searchFn = vi.fn((success: (data: any) => void) => {
+    const searchFn = vi.fn((success: (data: { results: unknown[]; count: number; next: string | null; previous: string | null }) => void) => {
       success({ results: [], count: 0, next: null, previous: null })
     })
 
-    const { result } = renderHook(() =>
+    renderHook(() =>
       usePaginatedSearch({
         cacheKey: 'not-cached',
         searchFn,
@@ -81,11 +81,11 @@ describe('usePaginatedSearch Hook', () => {
   })
 
   it('updates when cacheKey changes', async () => {
-    const searchFn = vi.fn((success: (data: any) => void) => {
+    const searchFn = vi.fn((success: (data: { results: unknown[]; count: number; next: string | null; previous: string | null }) => void) => {
       success({ results: [], count: 0, next: null, previous: null })
     })
 
-    const { result, rerender } = renderHook(
+    const { rerender } = renderHook(
       ({ cacheKey }) =>
         usePaginatedSearch({
           cacheKey,
@@ -108,7 +108,7 @@ describe('usePaginatedSearch Hook', () => {
   })
 
   it('updates when page changes', async () => {
-    const searchFn = vi.fn((success: (data: any) => void) => {
+    const searchFn = vi.fn((success: (data: { results: unknown[]; count: number; next: string | null; previous: string | null }) => void) => {
       success({ results: [], count: 0, next: null, previous: null })
     })
 

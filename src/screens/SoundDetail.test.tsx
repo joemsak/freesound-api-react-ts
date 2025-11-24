@@ -46,7 +46,7 @@ vi.mock('../contexts/SoundCacheContext', async () => {
 
 vi.mock('../services/freesound', () => ({
   freesound: {
-    getSound: vi.fn((id: number, success: (data: any) => void) => {
+    getSound: vi.fn((id: number, success: (data: { id: number; name: string; username: string }) => void) => {
       if (id === 456) {
         success({
           id: 456,
