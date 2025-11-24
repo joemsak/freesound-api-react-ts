@@ -209,9 +209,17 @@ class FreesoundClient {
               const parsedData = parse_response(xhr.responseText);
               // Attach response headers for caching
               const headers: Record<string, string> = {};
-              const etag = xhr.getResponseHeader('ETag');
-              const lastModified = xhr.getResponseHeader('Last-Modified');
-              const cacheControl = xhr.getResponseHeader('Cache-Control');
+              // Browsers block reading ETag header for security - use try-catch
+              let etag: string | null = null;
+              let lastModified: string | null = null;
+              let cacheControl: string | null = null;
+              try {
+                etag = xhr.getResponseHeader('ETag');
+                lastModified = xhr.getResponseHeader('Last-Modified');
+                cacheControl = xhr.getResponseHeader('Cache-Control');
+              } catch {
+                // Headers may be blocked by browser CORS policy - ignore
+              }
               
               if (etag) headers['ETag'] = etag;
               if (lastModified) headers['Last-Modified'] = lastModified;
