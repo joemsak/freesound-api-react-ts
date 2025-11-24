@@ -6,6 +6,13 @@ interface SearchInputProps {
 }
 
 export function SearchInput({ query, onQueryChange, onSearch, loading }: SearchInputProps) {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!loading) {
+      onSearch();
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !loading) {
       e.preventDefault();
@@ -14,7 +21,7 @@ export function SearchInput({ query, onQueryChange, onSearch, loading }: SearchI
   };
 
   return (
-    <div className="flex gap-2 w-full">
+    <form onSubmit={handleSubmit} className="flex gap-2 w-full">
       <input
         type="text"
         value={query}
@@ -24,14 +31,13 @@ export function SearchInput({ query, onQueryChange, onSearch, loading }: SearchI
         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
-        onClick={onSearch}
+        type="submit"
         disabled={loading}
-        type="button"
         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap"
       >
         {loading ? 'Searching...' : 'Search'}
       </button>
-    </div>
+    </form>
   );
 }
 

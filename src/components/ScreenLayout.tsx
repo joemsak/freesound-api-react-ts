@@ -1,14 +1,13 @@
 import { type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
 import { EmptyState } from './EmptyState';
+import { SoundDetailSkeleton } from './SoundDetailSkeleton';
 
 interface ScreenLayoutProps {
   loading: boolean;
   error: string | null;
   hasData: boolean;
-  loadingMessage?: string;
   emptyMessage?: string;
   showBackLink?: boolean;
   children: ReactNode;
@@ -18,19 +17,12 @@ export function ScreenLayout({
   loading,
   error,
   hasData,
-  loadingMessage = 'Loading...',
   emptyMessage,
   showBackLink = true,
   children,
 }: ScreenLayoutProps) {
   if (loading && !hasData) {
-    return (
-      <div className="w-full max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <LoadingSpinner message={loadingMessage} />
-        </div>
-      </div>
-    );
+    return <SoundDetailSkeleton />;
   }
 
   if (error) {

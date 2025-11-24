@@ -9,6 +9,7 @@ import { PAGE_SIZE, MAX_NAVIGATION_DISTANCE, DEFAULT_SOUND_FIELDS } from '../con
 import { SearchInput } from '../components/SearchInput';
 import { SearchResults } from '../components/SearchResults';
 import { SearchResultsHeader } from '../components/SearchResultsHeader';
+import { SearchResultsSkeleton } from '../components/SearchResultsSkeleton';
 import { Pagination } from '../components/Pagination';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { EmptyState } from '../components/EmptyState';
@@ -150,7 +151,8 @@ export function FreesoundSearch() {
     const queryChanged = !lastSearch || lastSearch.query !== urlQuery;
     
     if (queryChanged) {
-      // New query - always do fresh search
+      // New query - reset ref and always do fresh search
+      lastSearchRef.current = null;
       setCurrentPage(urlPage);
       performSearch(urlQuery, urlPage);
       return;
@@ -251,8 +253,21 @@ export function FreesoundSearch() {
         {/* Error Message */}
         {error && <ErrorMessage message={error} />}
 
+        {/* Loading Skeleton */}
+        {loading && !sounds && (
+          <div>
+            {urlQuery && (
+              <div className="mb-4">
+                <div className="h-8 bg-gray-200 rounded w-64 mb-2 animate-pulse"></div>
+                <div className="h-5 bg-gray-200 rounded w-32 animate-pulse"></div>
+              </div>
+            )}
+            <SearchResultsSkeleton count={PAGE_SIZE} />
+          </div>
+        )}
+
         {/* Results */}
-        {sounds && (
+        {sounds && !loading && (
           <div>
             <SearchResultsHeader
               count={sounds.count}

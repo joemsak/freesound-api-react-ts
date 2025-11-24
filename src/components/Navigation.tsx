@@ -13,6 +13,8 @@ export function Navigation({ onToggleFavorites, favoritesOpen }: NavigationProps
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { favorites } = useFavorites();
+  // Check if we're on the home page
+  // React Router with basename automatically strips the basename from pathname
   const isHomePage = location.pathname === '/';
   const urlQuery = searchParams.get('q') || '';
   const [query, setQuery] = useState(urlQuery);

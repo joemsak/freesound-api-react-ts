@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Home } from './screens/Home';
 import { FreesoundSearch } from './screens/FreesoundSearch';
 import { SoundDetail } from './screens/SoundDetail';
@@ -8,6 +8,20 @@ import { TagSearch } from './screens/TagSearch';
 import { FavoritesSidebar } from './components/FavoritesSidebar';
 import { Navigation } from './components/Navigation';
 import { FixedAudioPlayer } from './components/FixedAudioPlayer';
+
+function AppRoutes() {
+  const location = useLocation();
+  
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/search" element={<FreesoundSearch key={location.pathname + location.search} />} />
+      <Route path="/sound/:soundId" element={<SoundDetail />} />
+      <Route path="/user/:username" element={<UserProfile />} />
+      <Route path="/tag/:tagName" element={<TagSearch />} />
+    </Routes>
+  );
+}
 
 function App() {
   // Access environment variables using import.meta.env
@@ -41,13 +55,7 @@ function App() {
           )}
 
           {/* Routes */}
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/search" element={<FreesoundSearch />} />
-            <Route path="/sound/:soundId" element={<SoundDetail />} />
-            <Route path="/user/:username" element={<UserProfile />} />
-            <Route path="/tag/:tagName" element={<TagSearch />} />
-          </Routes>
+          <AppRoutes />
         </div>
       </div>
 

@@ -5,7 +5,7 @@ import { useSoundCache } from '../contexts/SoundCacheContext';
 import { AudioPlayer } from './AudioPlayer';
 import { FavoriteButton } from './FavoriteButton';
 import { CloseButton } from './CloseButton';
-import { LoadingSpinner } from './LoadingSpinner';
+import { SoundCardSkeleton } from './SoundCardSkeleton';
 import { SoundTitle } from './SoundTitle';
 import { useCancelledRef } from '../hooks/useAsyncEffect';
 
@@ -103,7 +103,11 @@ export function FavoritesSidebar({ isOpen, onToggle }: FavoritesSidebarProps) {
       </div>
 
       {loading && favorites.length > 0 && (
-        <LoadingSpinner message="Loading favorites..." />
+        <div className="space-y-4">
+          {Array.from({ length: Math.min(favorites.length, 3) }).map((_, index) => (
+            <SoundCardSkeleton key={index} />
+          ))}
+        </div>
       )}
 
       {!loading && favorites.length === 0 && (
