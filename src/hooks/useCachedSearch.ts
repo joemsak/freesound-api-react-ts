@@ -39,23 +39,17 @@ export function useCachedSearch({
     // Check cache first
     const cachedResults = getSearchResults(cacheKey, page);
     if (cachedResults) {
-      // Defer setState to avoid cascading renders
-      requestAnimationFrame(() => {
-        setData(cachedResults);
-        setLoading(false);
-        if (onSuccess) {
-          onSuccess(cachedResults);
-        }
-      });
+      setData(cachedResults);
+      setLoading(false);
+      if (onSuccess) {
+        onSuccess(cachedResults);
+      }
       return;
     }
 
     // Not in cache, make API call
-    // Defer setState to avoid cascading renders
-    requestAnimationFrame(() => {
-      setLoading(true);
-      setError(null);
-    });
+    setLoading(true);
+    setError(null);
 
     searchFn(
       (apiData: SoundCollection) => {

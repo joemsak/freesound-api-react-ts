@@ -25,26 +25,27 @@ export function SoundTitle({
     : 'text-sm text-gray-600 truncate';
 
   return (
-    <Link
-      to={`/sound/${soundId}`}
-      className={`block hover:text-blue-600 transition-colors cursor-pointer ${className}`}
-      title={soundName}
-    >
-      <h3 className={titleClasses} title={soundName}>
-        {soundName}
-      </h3>
+    <div className={`block ${className}`}>
+      <Link
+        to={`/sound/${soundId}`}
+        className="hover:text-blue-600 transition-colors cursor-pointer"
+        title={soundName}
+      >
+        <h3 className={titleClasses} title={soundName}>
+          {soundName}
+        </h3>
+      </Link>
       <p className={usernameClasses} title={`by ${username}`}>
         by{' '}
         <Link
           to={buildUserUrl(username, 1)}
-          onClick={(e) => e.stopPropagation()}
           className="text-blue-600 hover:underline cursor-pointer"
           title={username}
         >
           {username}
         </Link>
       </p>
-    </Link>
+    </div>
   );
 }
 

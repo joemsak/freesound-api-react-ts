@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Home } from './screens/Home';
 import { FreesoundSearch } from './screens/FreesoundSearch';
 import { SoundDetail } from './screens/SoundDetail';
@@ -10,11 +10,8 @@ import { Navigation } from './components/Navigation';
 import { FixedAudioPlayer } from './components/FixedAudioPlayer';
 
 function AppRoutes() {
-  const location = useLocation();
-  // Use location to ensure Routes re-renders when location changes
-  // This is necessary to ensure React Router properly updates the rendered component
   return (
-    <Routes location={location}>
+    <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/search" element={<FreesoundSearch />} />
       <Route path="/sound/:soundId" element={<SoundDetail />} />
