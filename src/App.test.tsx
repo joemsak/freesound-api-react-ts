@@ -41,7 +41,6 @@ vi.mock('./contexts/AudioPlayerContext', async () => {
   }
 })
 
-// Mock the screens to avoid API calls
 vi.mock('./screens/Home', () => ({
   Home: () => <div data-testid="home-screen">Home Screen</div>,
 }))
