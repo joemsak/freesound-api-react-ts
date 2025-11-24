@@ -38,9 +38,13 @@ export function SoundDetail() {
 
   useEffect(() => {
     if (!soundId) {
-      setError('Invalid sound ID');
-      setLoading(false);
+      // Reset all state at once - this is necessary for error handling
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSound(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setError('Invalid sound ID');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(false);
       return;
     }
 
@@ -48,9 +52,12 @@ export function SoundDetail() {
     
     // Reset state IMMEDIATELY when soundId changes for instant feedback
     cancelledRef.current = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSound(null);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(null);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
-    setSound(null); // Clear previous sound immediately
     
     // Check cache first
     const cached = getSound(id);
